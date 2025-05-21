@@ -377,8 +377,27 @@ Object::operator bool(){
     return result;
 }
 
+// -*-
+Object::operator i64(){
+    if(this->is_integer()){
+        auto num = std::get<i64>(this->m_value);
+        return num;
+    }
+    if(this->is_float()){
+        auto num = std::get<f64>(this->m_value);
+        return num;
+    }
+    if(this->is_bool()){
+        auto val = std::get<bool>(this->m_value);
+        return (val ? 1 : 0);
+    }
+    std::stringstream stream;
+    stream << "cannot convert `" << this->type().data << "' into `integer'";
+    throw Error(Error::TypeError, stream.str());
+}
+
+
 /*
-Object::operator i64(){}
 Object::operator f64(){}
 Object::operator Str(){}
 Object::operator Symbol(){}
