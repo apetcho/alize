@@ -490,8 +490,12 @@ bool Object::is_integer(void) const{
     return this->m_typekind == TypeKind::Int;
 }
 
+// -*-
+bool Object::is_float(void) const{
+    return this->m_typekind == TypeKind::Float;
+}
+
 /*
-bool Object::is_float(void) const{}
 bool Object::is_symbol(void) const{}
 bool Object::is_string(void) const{}
 bool Object::is_builtin_function(void) const{}
