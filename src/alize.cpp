@@ -259,9 +259,12 @@ Str Closure::name(void) const{
     return result;
 }
 
-/*
-const Ast& Closure::ast(void) const{}
+// -*-
+const Ast& Closure::ast(void) const{
+    return this->m_ast;
+}
 
+/*
 // -*----------*-
 // -*- Object -*-
 // -*----------*-
