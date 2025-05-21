@@ -202,8 +202,8 @@ public:
 
 private:
     TypeKind m_typekind;
-    Value m_value;
     Option<Str> m_name{};
+    Value m_value;
 };
 
 // -*-------*-

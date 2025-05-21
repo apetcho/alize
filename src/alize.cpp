@@ -281,9 +281,14 @@ Object::Object(i64 val)
 : m_typekind{TypeKind::Int}
 , m_value{val}{}
 
+// -*-
+Object::Object(f64 val)
+: m_typekind{TypeKind::Float}
+, m_value{val}{}
+
+
 
 /*
-Object::Object(f64 val){}
 Object::Object(Str val){}
 Object::Object(Symbol val){}
 Object::Object(Str name, CFun cfun){}
