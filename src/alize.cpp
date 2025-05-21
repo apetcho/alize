@@ -276,8 +276,13 @@ Object::Object(bool val)
 : m_typekind{TypeKind::Bool}
 , m_value{val}{}
 
+// -*-
+Object::Object(i64 val)
+: m_typekind{TypeKind::Int}
+, m_value{val}{}
+
+
 /*
-Object::Object(i64 val){}
 Object::Object(f64 val){}
 Object::Object(Str val){}
 Object::Object(Symbol val){}
