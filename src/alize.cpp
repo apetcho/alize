@@ -1,0 +1,190 @@
+#include "alize.hpp"
+#include<iomanip>
+
+// -*----------------------------------------------------------------*-
+// -*- begin::namespace::alz                                        -*-
+// -*----------------------------------------------------------------*-
+namespace alz{
+// -*-
+
+// -*-----------*-
+// -*- Closure -*-
+// -*-----------*-
+Closure::Closure(FunAst ast)
+: m_kind{Closure::Kind::Fun}
+, m_ast{std::make_shared<FunAst>(ast)}
+{}
+
+// -*-
+Closure::Closure(LambdaAst ast)
+: m_kind{Closure::Kind::Lambda}
+, m_ast{std::make_shared<LambdaAst>(ast)}
+{}
+
+// -*-
+Closure::Closure(MacroAst ast)
+: m_kind{Closure::Kind::Macro}
+, m_ast{std::make_shared<MacroAst>(ast)}
+{}
+
+// -*-
+Closure::~Closure(){
+    this->m_ast.reset();
+}
+
+// -*-
+Object Closure::operator()(Vec<Object> argv, Env& env){
+    Object result{};
+    if(this->is_function()){
+        auto ast = dynamic_cast<FunAst*>(this->m_ast.get());
+        if(ast == nullptr){
+            throw Error(
+                Error::Kind::RuntimeError,
+                "unexpected error occurred while creating a `function`"
+            );
+        }
+        auto params = ast->params();
+        if(params.size() != argv.size()){
+            throw Error(Error::SyntaxError, "arguments count mismatch");
+        }
+        auto scope = ast->scope();
+        scope.set_parent(&env);
+        for(auto i=0; i < params.size(); i++){
+            auto key = static_cast<Str>(params[i]);
+            Object val(argv[i]);
+            scope.update(key, val);
+        }
+        result = ast->eval(scope);
+    }else if(this->is_lambda()){
+        auto ast = dynamic_cast<LambdaAst*>(this->m_ast.get());
+        if(ast == nullptr){
+            throw Error(
+                Error::Kind::RuntimeError, 
+                "unexpected error occurred while creating a `lambda`"
+            );
+        }
+        auto params = ast->params();
+        if(params.size() != argv.size()){
+            throw Error(Error::SyntaxError, "arguments count mismatch");
+        }
+        auto scope = ast->scope();
+        scope.set_parent(&env);
+        for(auto i=0; i < params.size(); i++){
+            auto key = static_cast<Str>(params[i]);
+            Object val(argv[i]);
+            scope.update(key, val);
+        }
+        result = ast->eval(scope);
+    }else if(this->is_macro()){
+        auto ast = dynamic_cast<MacroAst*>(this->m_ast.get());
+        if(ast == nullptr){
+            throw Error(
+                Error::Kind::RuntimeError,
+                "unexpected error occurred while creating a `macro`"
+            );
+        }
+        auto params = ast->params();
+        if(params.size() != argv.size()){
+            throw Error(Error::SyntaxError, "arguments count mismatch");
+        }
+        auto scope = ast->scope();
+        scope.set_parent(&env);
+        for(auto i=0; i < params.size(); i++){
+            auto key = static_cast<Str>(params[i]);
+            Object val(argv[i]);
+            scope.update(key, val);
+        }
+        result = ast->eval(scope);
+    }
+
+    return result;
+}
+
+/*
+bool Closure::is_function(void) const{}
+bool Closure::is_lambda(void) const{}
+bool Closure::is_macro(void) const{}
+Str Closure::str(void) const{}
+Str Closure::repr(void) const{}
+Str Closure::name(void) const{}
+const Ast& Closure::ast(void) const{}
+
+// -*----------*-
+// -*- Object -*-
+// -*----------*-
+Object::Object(){}
+Object::Object(bool){}
+Object::Object(i64){}
+Object::Object(f64){}
+Object::Object(Str){}
+Object::Object(Symbol){}
+Object::Object(Str, CFun){}
+Object::Object(Option<Str>, Closure){}
+Object::Object(ArrayList){}
+Object::Object(const Object& other){}
+Object::Object(Object&& other){}
+Object::Object& operator==(const Object& other){}
+Object::Object& operator==(Object&& other){}
+Object::~Object(){}
+
+// -*- type-cast -*-
+Object::operator bool(){}
+Object::operator i64(){}
+Object::operator f64(){}
+Object::operator Str(){}
+Object::operator Symbol(){}
+Object::operator CFun(){}
+Object::operator Closure(){}
+Object::operator ArrayList(){}
+
+// -*- Predicates -*-
+bool Object::is_nil(void) const{}
+bool Object::is_bool(void) const{}
+bool Object::is_integer(void) const{}
+bool Object::is_float(void) const{}
+bool Object::is_symbol(void) const{}
+bool Object::is_string(void) const{}
+bool Object::is_builtin_function(void) const{}
+bool Object::is_closure(void) const{}
+bool Object::is_list(void) const{}
+
+// -*- stringifiers -*-
+Str Object::str(void) const{}
+Str Object::repr(void) const{}
+    
+// -*- unary-operator: {-, +, ~, } -*-
+Object& Object::operator-(){}
+Object& Object::operator+(){}
+Object& Object::operator~(){}
+
+// -*- binary-operator: {-, +, *, /, %, and, or,} -*-
+Object operator+(const Object& lhs, const Object& rhs){}
+Object operator-(const Object& lhs, const Object& rhs){}
+Object operator*(const Object& lhs, const Object& rhs){}
+Object operator/(const Object& lhs, const Object& rhs){}
+Object operator%(const Object& lhs, const Object& rhs){}
+Object operator||(const Object& lhs, const Object& rhs){}
+Object operator&&(const Object& lhs, const Object& rhs){}
+
+// -*- miscelaneous methods -*-
+Symbol Object::type(void) const{}
+
+
+// -*-------*-
+// -*- Env -*-
+// -*-------*-
+Env::Env(){}
+Env::Env(Env* parent){}
+Env::Env(const Env& other){}
+Env::~Env(){}
+void Env::put(Str key, const Object& val){}
+void Env::update(Str key, const Object& val){}
+Object Env::get(Str key){}
+bool Env::contains(const Str key){}
+bool Env::contains(const Str key){}
+
+*/
+
+// -*----------------------------------------------------------------*-
+}//-*- end::namespace::alz                                          -*-
+// -*----------------------------------------------------------------*-

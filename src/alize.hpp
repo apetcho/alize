@@ -23,9 +23,7 @@ namespace fs = std::filesystem;
 namespace alz{
 // -
 
-
 // -*-
-
 class Env;
 class Object;
 class AstBase;
@@ -74,6 +72,21 @@ using Dict = std::map<Str, Object>;
 using Args = Vec<Object>;
 
 // -*-
+class Error final: std::runtime_error{
+public:
+    enum Kind{Default, TypeError, ValueError, SyntaxError, RuntimeError};
+    explicit Error(const Str& msg);
+    explicit Error(Error::Kind kind, const Str& msg);
+    ~Error() = default;
+    const char* what(void) const noexcept override;
+    Str describe(void) const;
+
+private:
+    Error::Kind m_kind;
+    Str m_msg;
+};
+
+// -*-
 struct Symbol final{
     Str data;
     Symbol() = default;
@@ -110,6 +123,7 @@ public:
     Str str(void) const;
     Str repr(void) const;
     Str name(void) const;
+    const Ast& ast(void) const;
 };
 
 // -*----------*-
@@ -125,10 +139,10 @@ class Object{
 
     using Value = std::variant<ALIZE_VARIANTS>;
 
-public:
     enum class TypeKind{
         Nil, Bool, Int, Float, String, Sym, Fn, Lambda, Fun, Macro, List,
     };
+public:
     explicit Object();                       // Nil
     explicit Object(bool);                   // Boolean
     explicit Object(i64);                    // Integer
@@ -140,9 +154,9 @@ public:
     explicit Object(ArrayList);              // List
     explicit Object(const Object& other);
     Object(Object&& other);
-    Object& operator==(const Object& other);
-    Object& operator==(Object&& other);
-    virtual ~Object();
+    Object& operator=(const Object& other);
+    Object& operator=(Object&& other);
+    virtual ~Object(){}
 
     // -*- type-cast -*-
     operator bool();
@@ -183,8 +197,7 @@ public:
     friend Object operator&&(const Object& lhs, const Object& rhs);
 
     // -*- miscelaneous methods -*-
-    Str type(void) const;
-    TypeKind kind(void) const;
+    Symbol type(void) const;
 
 private:
     TypeKind m_typekind;
@@ -204,6 +217,7 @@ public:
     void update(Str key, const Object& val);
     Object get(Str key);
     bool contains(const Str key);
+    void set_parent(Env* parent);
 private:
     Dict m_bindings;
     Env* m_parent;
@@ -340,7 +354,7 @@ public:
     AstBase(AstKind kind): m_kind{kind}{}
     virtual ~AstBase() = default;
     AstKind kind() const { return this->m_kind; }
-    virtual Object eval([[maybe_unused]] Alize& alize) = 0;
+    virtual Object eval([[maybe_unused]] Env& env) = 0;
     virtual Str str(void) const = 0;
     virtual Str repr(void) const = 0;
 
@@ -354,7 +368,7 @@ class IdentAst final: public AstBase{
 public:
     explicit IdentAst(Token token);
     ~IdentAst() = default;
-    Object eval([[maybe_unused]] Alize& alize) override;
+    Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
     Str literal(void) const;
@@ -369,7 +383,7 @@ class IntegerAst final: public AstBase{
 public:
     explicit IntegerAst(Token token);
     ~IntegerAst() = default;
-    Object eval([[maybe_unused]] Alize& alize) override;
+    Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
     Str literal(void) const;
@@ -384,7 +398,7 @@ class FloatAst final: public AstBase{
 public:
     explicit FloatAst(Token token);
     ~FloatAst() = default;
-    Object eval([[maybe_unused]] Alize& alize) override;
+    Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
     Token literal();
@@ -399,7 +413,7 @@ class StringAst final: public AstBase{
 public:
     explicit StringAst(Token token);
     ~StringAst() = default;
-    Object eval([[maybe_unused]] Alize& alize) override;
+    Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
     Str literal(void) const;
@@ -414,7 +428,7 @@ class ListAst final: public AstBase{
 public:
     explicit ListAst(Vec<Token> tokens);
     ~ListAst() = default;
-    Object eval([[maybe_unused]] Alize& alize) override;
+    Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
 
@@ -428,13 +442,18 @@ class LambdaAst final: public AstBase{
 public:
     explicit LambdaAst(Vec<Token> params, Vec<Ast> asts);
     ~LambdaAst() = default;
-    Object eval([[maybe_unused]] Alize& alize) override;
+    Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
+
+    Vec<Symbol> params(void) const;
+    Vec<Ast> body(void) const;
+    Env scope(void) const;
 
 private:
     Vec<Token> m_params;
     Vec<Ast> m_body;
+    Env m_scope;
 };
 
 // -*- User-defined function AST -*-
@@ -443,14 +462,20 @@ class FunAst final: public AstBase{
 public:
     explicit FunAst(Token name, Vec<Token> params, Vec<Ast> body);
     ~FunAst() = default;
-    Object eval([[maybe_unused]] Alize& alize) override;
+    Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
+
+    Str name(void) const;
+    Vec<Symbol> params(void) const;
+    Vec<Ast> body(void) const;
+    Env scope(void) const;
 
 private:
     Token m_name;
     Vec<Token> m_params;
     Vec<Ast> m_body;
+    Env m_scope;
 };
 
 // -*- Macro AST -*-
@@ -459,14 +484,20 @@ class MacroAst final: public AstBase{
 public:
     explicit MacroAst(Token name, Vec<Token> params, Vec<Ast> body);
     ~MacroAst() = default;
-    Object eval([[maybe_unused]] Alize& alize) override;
+    Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
+
+    Str name(void) const;
+    Vec<Symbol> params(void) const;
+    Vec<Ast> body(void) const;
+    Env scope(void) const;
 
 private:
     Token m_name;
     Vec<Token> m_params;
     Vec<Ast> m_body;
+    Env m_scope;
 };
 
 // -*- If AST -*-
@@ -475,7 +506,7 @@ class IfAst final: public AstBase{
 public:
     explicit IfAst(Ast test, Ast okay, Ast alt);
     ~IfAst() = default;
-    Object eval([[maybe_unused]] Alize& alize) override;
+    Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
 
@@ -491,7 +522,7 @@ class DefineAst final: public AstBase{
 public:
     explicit DefineAst(Token name, Ast ast);
     ~DefineAst() = default;
-    Object eval([[maybe_unused]] Alize& alize) override;
+    Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
 
@@ -506,7 +537,7 @@ class PrognAst final: public AstBase{
 public:
     explicit PrognAst(Vec<Ast> body);
     ~PrognAst() = default;
-    Object eval([[maybe_unused]] Alize& alize) override;
+    Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
 
@@ -520,7 +551,7 @@ class ForAst final: public AstBase{
 public:
     explicit ForAst(Vec<Ast> args, Vec<Ast> body);
     ~ForAst() = default;
-    Object eval([[maybe_unused]] Alize& alize) override;
+    Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
 
@@ -535,7 +566,7 @@ class CondAst final: public AstBase{
 public:
     explicit CondAst(Vec<Ast> clauses);
     ~CondAst() = default;
-    Object eval([[maybe_unused]] Alize& alize) override;
+    Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
 
@@ -551,7 +582,7 @@ class ImportAst final: public AstBase{
 public:
     explicit ImportAst(Symbol sym);
     ~ImportAst() = default;
-    Object eval([[maybe_unused]] Alize& alize) override;
+    Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
 
