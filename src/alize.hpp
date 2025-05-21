@@ -43,6 +43,7 @@ class PrognAst;
 class ForAst;
 class CondAst;
 class ImportAst;
+class LetAst;
 
 struct Closure;
 struct Symbol;
@@ -329,7 +330,8 @@ private:
     ALIZE_DEF(Progn, "PROGN")                       \
     ALIZE_DEF(For, "FOR")                           \
     ALIZE_DEF(Cond, "COND")                         \
-    ALIZE_DEF(Import, "IMPORT")
+    ALIZE_DEF(Import, "IMPORT")                     \
+    ALIZE_DEF(Let, "LET")
 
 
 // -*-
@@ -592,6 +594,23 @@ private:
     fs::path m_path;
 };
 
+// -*-----------*-
+// -*- Let AST -*-
+// -*-----------*-
+// (let ((x xval) (y yval) ...) body)
+class LetAst final: public AstBase{
+public:
+    explicit LetAst(Vec<ListAst> defs, Vec<Ast> body);
+    ~LetAst() = default;
+    Object eval([[maybe_unused]] Env& env) override;
+    Str str(void) const override;
+    Str repr(void) const override;
+
+private:
+    Vec<ListAst> m_defs;
+    Vec<Ast> m_body;
+};
+
 
 // -*- Parser -*-
 class Parser final{
@@ -651,6 +670,8 @@ namespace builtins{
     Object fn_replace(Args argv);
     Object fn_join(Args argv);
     Object fn_split(Args argv);
+    Object fn_startswith(Args argv);
+    Object fn_endswith(Args argv);
 
     Object fn_addpath(Args argv);
     Object fn_println(Args argv);
@@ -662,6 +683,7 @@ namespace builtins{
     Object fn_random(Args argv);
     Object fn_filter(Args argv);
     Object fn_map(Args argv);
+    Object fn_reduce(Args argv);
     Object fn_zip(Args argv);
 
     // -*- math -*-

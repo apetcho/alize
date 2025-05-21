@@ -151,8 +151,88 @@ Str Closure::str(void) const{
     return stream.str();
 }
 
+// -*-
+Str Closure::repr(void) const{
+    std::stringstream stream;
+    if(this->is_function()){
+        auto ast = dynamic_cast<FunAst*>(this->m_ast.get());
+        if(ast == nullptr){
+            throw Error(
+                Error::Kind::RuntimeError,
+                "unexpected error occurred while creating a `function`"
+            );
+        }
+        stream << "(fun " << ast->name() << "(";
+        auto params = ast->params();
+        if(params.size()==0){
+            stream << ")";
+        }else{
+            for(auto i=0; i < params.size(); i++){
+                stream << static_cast<Str>(params[i]);
+                if(i < params.size()-1){ stream << " "; }
+            }
+            stream << ")\n    ";
+        }
+        auto body = ast->body();
+        for(const auto& elem: body){
+            stream << elem->repr() << "\n    ";
+        }
+        stream << "\n    )";
+    }else if(this->is_lambda()){
+        auto ast = dynamic_cast<LambdaAst*>(this->m_ast.get());
+        if(ast == nullptr){
+            throw Error(
+                Error::Kind::RuntimeError,
+                "unexpected error occurred while creating a `lambda`"
+            );
+        }
+        stream << "(lambda (";
+        auto params = ast->params();
+        if(params.size()==0){
+            stream << ")";
+        }else{
+            for(auto i=0; i < params.size(); i++){
+                stream << static_cast<Str>(params[i]);
+                if(i < params.size()-1){ stream << " "; }
+            }
+            stream << ")\n    ";
+        }
+        auto body = ast->body();
+        for(const auto& elem: body){
+            stream << elem->repr() << "\n    ";
+        }
+        stream << "\n    )";
+    }
+    else if(this->is_macro()){
+        auto ast = dynamic_cast<MacroAst*>(this->m_ast.get());
+        if(ast == nullptr){
+            throw Error(
+                Error::Kind::RuntimeError,
+                "unexpected error occurred while creating a `macro`"
+            );
+        }
+        stream << "(macro " << ast->name() << "(";
+        auto params = ast->params();
+        if(params.size()==0){
+            stream << ")";
+        }else{
+            for(auto i=0; i < params.size(); i++){
+                stream << static_cast<Str>(params[i]);
+                if(i < params.size()-1){ stream << " "; }
+            }
+            stream << ")\n    ";
+        }
+        auto body = ast->body();
+        for(const auto& elem: body){
+            stream << elem->repr() << "\n    ";
+        }
+        stream << "\n    )";
+    }
+
+    return stream.str();
+}
+
 /*
-Str Closure::repr(void) const{}
 Str Closure::name(void) const{}
 const Ast& Closure::ast(void) const{}
 
