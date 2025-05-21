@@ -12,7 +12,6 @@
 #include<memory>
 #include<string>
 #include<vector>
-#include<limits>
 #include<map>
 
 namespace fs = std::filesystem;
@@ -738,6 +737,21 @@ public:
 
     static Env runtime;
     static void initialize(void);
+
+    // -*-
+    static bool almostEqual(f64 x, f64 y){
+        constexpr f64 myMin = std::numeric_limits<f64>::min();
+        constexpr f64 myErr = 1.0e-13;
+        if(!std::isfinite(x) || !std::isfinite(y)){
+            return false;
+        }
+        auto diff = std::abs(x-y);
+        if(diff < myMin){ return true; }
+        auto xa = std::abs(x);
+        auto ya = std::abs(y);
+        auto xymax = std::max(xa, ya);
+        return (diff/xymax) <= myErr;
+    }
 
 private:
     static Dict prelude;

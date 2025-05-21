@@ -1,5 +1,7 @@
 #include "alize.hpp"
 #include<iomanip>
+#include<cmath>
+#include<limits>
 
 // -*----------------------------------------------------------------*-
 // -*- begin::namespace::alz                                        -*-
@@ -347,11 +349,35 @@ Object& Object::operator=(Object&& other){
     return *this;
 }
 
-/*
-Object::~Object(){}
-
 // -*- type-cast -*-
-Object::operator bool(){}
+Object::operator bool(){
+    bool result{};
+    switch(this->m_typekind){
+    case TypeKind::Nil:
+        result = false;
+        break;
+    case TypeKind::Bool:
+        result = std::get<bool>(this->m_value);
+        break;
+    case TypeKind::Int:{
+            auto num = std::get<i64>(this->m_value);
+            result = (num == 0) ? false : true;
+        }
+        break;
+    case TypeKind::Float:{
+            auto num = std::get<f64>(this->m_value);
+            result = Alize::almostEqual(num, 0.0);
+        }
+        break;
+    default:
+        result = true;
+        break;
+    }
+
+    return result;
+}
+
+/*
 Object::operator i64(){}
 Object::operator f64(){}
 Object::operator Str(){}
