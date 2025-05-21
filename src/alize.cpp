@@ -300,8 +300,9 @@ Object::Object(Symbol val)
 
 
 // -*-
-Object::Object(CFun cfun)
+Object::Object(Str name, CFun cfun)
 : m_typekind{TypeKind::Fn}
+, m_name{name}
 , m_value{cfun}{}
 
 
@@ -323,17 +324,20 @@ Object::Object(ArrayList xs)
 // -*-
 Object::Object(const Object& other)
 : m_typekind{other.m_typekind}
+, m_name{other.m_name}
 , m_value{other.m_value}{}
 
 // -*-
 Object::Object(Object&& other)
 : m_typekind{std::move(other.m_typekind)}
+, m_name{std::move(other.m_name)}
 , m_value{std::move(other.m_value)}{}
 
 // -*-
 Object& Object::operator=(const Object& other){
     if(this != &other){
         this->m_typekind = other.m_typekind;
+        this->m_name = other.m_name;
         this->m_value = other.m_value;
     }
 
@@ -344,6 +348,7 @@ Object& Object::operator=(const Object& other){
 Object& Object::operator=(Object&& other){
     if(this != &other){
         this->m_typekind = std::move(other.m_typekind);
+        this->m_name = std::move(other.m_name);
         this->m_value = std::move(other.m_value);
     }
     return *this;
@@ -411,7 +416,7 @@ Object::operator f64(){
         return (val ? 1.0 : 0.0);
     }
     std::stringstream stream;
-    stream << "cannot convert `" << this->type().data << "' into `integer'";
+    stream << "cannot convert `" << this->type().data << "' into `float'";
     throw Error(Error::TypeError, stream.str());
 }
 
@@ -422,7 +427,7 @@ Object::operator Str(){
         return str;
     }
     std::stringstream stream;
-    stream << "cannot convert `" << this->type().data << "' into `integer'";
+    stream << "cannot convert `" << this->type().data << "' into `string'";
     throw Error(Error::TypeError, stream.str());
 }
 
@@ -433,12 +438,22 @@ Object::operator Symbol(){
         return str;
     }
     std::stringstream stream;
-    stream << "cannot convert `" << this->type().data << "' into `integer'";
+    stream << "cannot convert `" << this->type().data << "' into `symbol'";
+    throw Error(Error::TypeError, stream.str());
+}
+
+// -*-
+Object::operator CFun(){
+    if(this->is_builtin_function()){
+        auto cfun = std::get<CFun>(this->m_value);
+        return cfun;
+    }
+    std::stringstream stream;
+    stream << "cannot convert `" << this->type().data << "' into `builtin function'";
     throw Error(Error::TypeError, stream.str());
 }
 
 /*
-Object::operator CFun(){}
 Object::operator Closure(){}
 Object::operator ArrayList(){}
 
