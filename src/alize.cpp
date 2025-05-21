@@ -485,8 +485,12 @@ bool Object::is_bool(void) const{
     return this->m_typekind == TypeKind::Bool;
 }
 
+// -*-
+bool Object::is_integer(void) const{
+    return this->m_typekind == TypeKind::Int;
+}
+
 /*
-bool Object::is_integer(void) const{}
 bool Object::is_float(void) const{}
 bool Object::is_symbol(void) const{}
 bool Object::is_string(void) const{}
