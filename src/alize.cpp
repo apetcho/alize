@@ -317,9 +317,13 @@ Object::Object(ArrayList xs)
 : m_typekind{TypeKind::List}
 , m_value{xs}{}
 
+
+// -*-
+Object::Object(const Object& other)
+: m_typekind{other.m_typekind}
+, m_value{other.m_value}{}
+
 /*
-Object::Object(const Object& other){}
-Object::Object(Object&& other){}
 Object::Object& operator=(const Object& other){}
 Object::Object& operator=(Object&& other){}
 Object::~Object(){}
