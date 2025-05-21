@@ -426,8 +426,18 @@ Object::operator Str(){
     throw Error(Error::TypeError, stream.str());
 }
 
+// -*-
+Object::operator Symbol(){
+    if(this->is_string()){
+        auto str = std::get<Symbol>(this->m_value);
+        return str;
+    }
+    std::stringstream stream;
+    stream << "cannot convert `" << this->type().data << "' into `integer'";
+    throw Error(Error::TypeError, stream.str());
+}
+
 /*
-Object::operator Symbol(){}
 Object::operator CFun(){}
 Object::operator Closure(){}
 Object::operator ArrayList(){}
