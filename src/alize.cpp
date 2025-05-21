@@ -110,8 +110,12 @@ bool Closure::is_lambda(void) const{
     return this->m_kind == Closure::Kind::Lambda;
 }
 
+// -*-
+bool Closure::is_macro(void) const{
+    return this->m_kind == Closure::Kind::Macro;
+}
+
 /*
-bool Closure::is_macro(void) const{}
 Str Closure::str(void) const{}
 Str Closure::repr(void) const{}
 Str Closure::name(void) const{}
