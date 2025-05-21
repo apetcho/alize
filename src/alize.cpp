@@ -338,8 +338,16 @@ Object& Object::operator=(const Object& other){
     return *this;
 }
 
+// -*-
+Object& Object::operator=(Object&& other){
+    if(this != &other){
+        this->m_typekind = std::move(other.m_typekind);
+        this->m_value = std::move(other.m_value);
+    }
+    return *this;
+}
+
 /*
-Object::Object& operator=(Object&& other){}
 Object::~Object(){}
 
 // -*- type-cast -*-
