@@ -492,6 +492,7 @@ public:
     Vec<Symbol> params(void) const;
     Vec<Ast> body(void) const;
     Env scope(void) const;
+    Ast expand(void) const;
 
 private:
     Token m_name;

@@ -115,8 +115,43 @@ bool Closure::is_macro(void) const{
     return this->m_kind == Closure::Kind::Macro;
 }
 
+// -*-
+Str Closure::str(void) const{
+    std::stringstream stream;
+    if(this->is_function()){
+        auto ast = dynamic_cast<FunAst*>(this->m_ast.get());
+        if(ast == nullptr){
+            throw Error(
+                Error::Kind::RuntimeError,
+                "unexpected error occurred while creating a `function`"
+            );
+        }
+        stream << "Function `" << ast->name() << "` @ 0x" << std::hex << ast;
+    }else if(this->is_lambda()){
+        auto ast = dynamic_cast<LambdaAst*>(this->m_ast.get());
+        if(ast == nullptr){
+            throw Error(
+                Error::Kind::RuntimeError,
+                "unexpected error occurred while creating a `function`"
+            );
+        }
+        stream << "Lambda @ 0x" << std::hex << ast;
+    }
+    else if(this->is_macro()){
+        auto ast = dynamic_cast<MacroAst*>(this->m_ast.get());
+        if(ast == nullptr){
+            throw Error(
+                Error::Kind::RuntimeError,
+                "unexpected error occurred while creating a `function`"
+            );
+        }
+        stream << "Function: `" << ast->name() << "` @ 0x" << std::hex << ast;
+    }
+
+    return stream.str();
+}
+
 /*
-Str Closure::str(void) const{}
 Str Closure::repr(void) const{}
 Str Closure::name(void) const{}
 const Ast& Closure::ast(void) const{}
