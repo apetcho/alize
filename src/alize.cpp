@@ -323,6 +323,12 @@ Object::Object(const Object& other)
 : m_typekind{other.m_typekind}
 , m_value{other.m_value}{}
 
+// -*-
+Object::Object(Object&& other)
+: m_typekind{std::move(other.m_typekind)}
+, m_value{std::move(other.m_value)}{}
+
+
 /*
 Object::Object& operator=(const Object& other){}
 Object::Object& operator=(Object&& other){}
