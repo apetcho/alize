@@ -1,0 +1,698 @@
+#ifndef ALIZE_HPP
+#define ALIZE_HPP
+
+#include<stdexcept>
+#include<filesystem>
+#include<iostream>
+#include<cstdint>
+#include<fstream>
+#include<sstream>
+#include<variant>
+#include<optional>
+#include<memory>
+#include<string>
+#include<vector>
+#include<limits>
+#include<map>
+
+namespace fs = std::filesystem;
+
+// -*----------------------------------------------------------------*-
+// -*- begin::namespace::alz                                        -*-
+// -*----------------------------------------------------------------*-
+namespace alz{
+// -
+
+
+// -*-
+
+class Env;
+class Object;
+class AstBase;
+class NilAst;
+class BoolAst;
+class IdentAst;
+class IntegerAst;
+class FloatAst;
+class StringAst;
+class ListAst;
+class LambdaAst;
+class FunAst;
+class MacroAst;
+class IfAst;
+class DefineAst;
+class PrognAst;
+class ForAst;
+class CondAst;
+class ImportAst;
+
+struct Closure;
+struct Symbol;
+
+struct Token;
+class Tokenizer;    // The Tokenizer
+class Parser;       // The Parser
+class Alize;        // Interpreter
+
+// -*-
+template<typename T>
+using Shared = std::shared_ptr<T>;
+using Ast = Shared<AstBase>;
+using Self = Shared<Object>;
+template<typename T>
+using Vec = std::vector<T>;
+template<typename T>
+using Option = std::optional<T>;
+using f64 = double;
+using i64 = std::int64_t;
+using u32 = std::uint32_t;
+using i32 = std::int32_t;
+using Str = std::string;
+using CFun = Object (*)(Vec<Object>);
+using ArrayList = Vec<Object>;
+using Dict = std::map<Str, Object>;
+using Args = Vec<Object>;
+
+// -*-
+struct Symbol final{
+    Str data;
+    Symbol() = default;
+    Symbol(const Str& str): data{str}{}
+    ~Symbol() = default;
+    operator Str(){ return this->data; }
+    friend bool operator==(const Symbol& lhs, const Symbol& rhs){
+        return (lhs.data == rhs.data);
+    }
+    friend bool operator==(const Str& lhs, const Symbol& rhs){
+        return (lhs == rhs.data);
+    }
+    friend bool operator==(const Symbol& lhs, const Str& rhs){
+        return (lhs.data == rhs);
+    }
+};
+
+// -*- Closure
+struct Closure final{
+private:
+    enum Kind{Fun, Lambda, Macro};
+    Kind m_kind;
+    Ast m_ast;
+public:
+    explicit Closure(FunAst ast);
+    explicit Closure(LambdaAst ast);
+    explicit Closure(MacroAst ast);
+    ~Closure();
+
+    Object operator()(Vec<Object> argv, Env& env);
+    bool is_function(void) const;
+    bool is_lambda(void) const;
+    bool is_macro(void) const;
+    Str str(void) const;
+    Str repr(void) const;
+    Str name(void) const;
+};
+
+// -*----------*-
+// -*- Object -*-
+// -*----------*-
+class Object{
+    enum Kind{
+        Nil, Bool, Int, Float, String, Sym, Fn, Lambda, Fun, Macro, List,
+    };
+
+#define ALIZE_VARIANTS  \
+    bool, i64, f64, Str, Symbol, CFun, Closure
+
+    using Value = std::variant<ALIZE_VARIANTS>;
+
+public:
+    enum class TypeKind{
+        Nil, Bool, Int, Float, String, Sym, Fn, Lambda, Fun, Macro, List,
+    };
+    explicit Object();                       // Nil
+    explicit Object(bool);                   // Boolean
+    explicit Object(i64);                    // Integer
+    explicit Object(f64);                    // Floating point number
+    explicit Object(Str);                    // String literal
+    explicit Object(Symbol);                 // Identifier
+    explicit Object(Str, CFun);              // Builtin function
+    explicit Object(Option<Str>, Closure);   // Fun, Lambda, Macro
+    explicit Object(ArrayList);              // List
+    explicit Object(const Object& other);
+    Object(Object&& other);
+    Object& operator==(const Object& other);
+    Object& operator==(Object&& other);
+    virtual ~Object();
+
+    // -*- type-cast -*-
+    operator bool();
+    operator i64();
+    operator f64();
+    operator Str();
+    operator Symbol();
+    operator CFun();
+    operator Closure();
+    operator ArrayList();
+    // -*- Predicates -*-
+    bool is_nil(void) const;
+    bool is_bool(void) const;
+    bool is_integer(void) const;
+    bool is_float(void) const;
+    bool is_symbol(void) const;
+    bool is_string(void) const;
+    bool is_builtin_function(void) const;
+    bool is_closure(void) const;
+    bool is_list(void) const;
+
+    // -*- stringifiers -*-
+    Str str(void) const;
+    Str repr(void) const;
+    
+    // -*- unary-operator: {-, +, ~, } -*-
+    Object& operator-();
+    Object& operator+();
+    Object& operator~();
+
+    // -*- binary-operator: {-, +, *, /, %, and, or,} -*-
+    friend Object operator+(const Object& lhs, const Object& rhs);
+    friend Object operator-(const Object& lhs, const Object& rhs);
+    friend Object operator*(const Object& lhs, const Object& rhs);
+    friend Object operator/(const Object& lhs, const Object& rhs);
+    friend Object operator%(const Object& lhs, const Object& rhs);
+    friend Object operator||(const Object& lhs, const Object& rhs);
+    friend Object operator&&(const Object& lhs, const Object& rhs);
+
+    // -*- miscelaneous methods -*-
+    Str type(void) const;
+    TypeKind kind(void) const;
+
+private:
+    TypeKind m_typekind;
+    Value m_value;
+};
+
+// -*-------*-
+// -*- Env -*-
+// -*-------*-
+class Env{
+public:
+    explicit Env();
+    explicit Env(Env* parent);
+    Env(const Env& other);
+    ~Env(){}
+    void put(Str key, const Object& val);
+    void update(Str key, const Object& val);
+    Object get(Str key);
+    bool contains(const Str key);
+private:
+    Dict m_bindings;
+    Env* m_parent;
+};
+
+
+// -*---------------------*-
+// -*- Token & Tokenizer -*-
+// -*---------------------*-
+#define ALIZE_RESERVED_WORDS()                      \
+    ALIZE_DEF(If, "if")                             \
+    ALIZE_DEF(Defun, "defun")                       \
+    ALIZE_DEF(Define, "define")                     \
+    ALIZE_DEF(Macro, "macro")                       \
+    ALIZE_DEF(Lambda, "lambda")                     \
+    ALIZE_DEF(And, "and")                           \
+    ALIZE_DEF(Or, "or")                             \
+    ALIZE_DEF(For, "for")                           \
+    ALIZE_DEF(Cond, "cond")                         \
+    ALIZE_DEF(Import, "import")
+
+
+#define ALIZE_TOKENS()                      \
+    ALIZE_DEF(Undef, "UNDEF")\
+    ALIZE_DEF(Eof, "EOF")                   \
+    ALIZE_DEF(Ident, "IDENTIFIER")          \
+    ALIZE_DEF(Bool, "BOOLEAN-LITERAL")      \
+    ALIZE_DEF(Nil, "NIL-LITERAL")           \
+    ALIZE_DEF(Integer, "INTEGER-LITERAL")   \
+    ALIZE_DEF(Float, "FLOAT-LITERAL")       \
+    ALIZE_DEF(String, "STRING-LITERAL")     \
+    ALIZE_DEF(LParen, "(")                  \
+    ALIZE_DEF(RParen, ")")                  \
+    ALIZE_DEF(Colon, ":")                   \
+    ALIZE_DEF(DColon, "::")                 \
+    ALIZE_DEF(Dot, ".")                     \
+    ALIZE_DEF(Quote, "'")                   \
+    ALIZE_DEF(Unquote, ",")                 \
+    ALIZE_DEF(Quasiquote, "`")              \
+    ALIZE_DEF(UnquoteSplicing, ",@")        \
+    ALIZE_DEF(Plus, "+")                    \
+    ALIZE_DEF(Minus, "-")                   \
+    ALIZE_DEF(Mul, "*")                     \
+    ALIZE_DEF(Div, "/")                     \
+    ALIZE_DEF(Mod, "%")                     \
+    ALIZE_RESERVED_WORDS()
+
+
+// ALIZE_DEF()
+
+enum class TokenKind{
+#define ALIZE_DEF(tok, _) tok,
+    ALIZE_TOKENS()
+#undef ALIZE_DEF
+};
+
+
+struct Token{
+    TokenKind kind;
+    Str lexeme;
+    i32 row;
+    i32 col;
+    explicit Token() : kind{TokenKind::Undef}, lexeme{}, row{-1}, col{-1}{}
+    explicit Token(TokenKind kd, const Str& txt, i32 r=-1, i32 c=-1)
+    : kind{kd}, lexeme{txt}, row{r}, col{c}{}
+};
+
+
+class Tokenizer{
+private:
+    Str m_src;
+    Str::const_iterator m_beg;
+    Str::const_iterator m_end;
+    Str::iterator m_ptr;
+
+public:
+    Tokenizer() = default;
+    explicit Tokenizer(const Str& src);
+    ~Tokenizer() = default;
+
+    Vec<Token> tokenize();
+
+private:
+    Token read_ident(void);
+    Token read_bool(void);
+    Token read_integer(void);
+    Token read_float(void);
+    Token read_str(void);
+    //Token read_list(void);
+    char peek();
+    bool match(const Str& ident);    
+};
+
+// -*------------------------*-
+// -*- ABSTACT SYNTAX TREES -*-
+// -*------------------------*-
+#define ALIZE_AST_KINDS()                           \
+    ALIZE_DEF(Ident, "IDENITIFIER")                 \
+    ALIZE_DEF(Boolean, "BOOLEAN")                   \
+    ALIZE_DEF(Integer, "INTEGER")                   \
+    ALIZE_DEF(Float, "FLOAT")                       \
+    ALIZE_DEF(String, "STRING")                     \
+    ALIZE_DEF(List, "LIST")                         \
+    ALIZE_DEF(Lambda, "LAMBDA")                     \
+    ALIZE_DEF(Fun, "FUN")                           \
+    ALIZE_DEF(Macro, "MACRO")                       \
+    ALIZE_DEF(If, "IF")                             \
+    ALIZE_DEF(Define, "DEFINE")                     \
+    ALIZE_DEF(Progn, "PROGN")                       \
+    ALIZE_DEF(For, "FOR")                           \
+    ALIZE_DEF(Cond, "COND")                         \
+    ALIZE_DEF(Import, "IMPORT")
+
+
+// -*-
+enum class AstKind{
+#define ALIZE_DEF(tok, _) tok,
+    ALIZE_AST_KINDS()
+#undef ALIZE_DEF
+};
+
+/*
+    ALIZE_DEF(Quote, "QUOTE")                       \
+    ALIZE_DEF(Unquote, "UNQUOTE")                   \
+    ALIZE_DEF(Quasiquote, "QUASIQUTE")              \
+    ALIZE_DEF(UnquoteSplicing, "UNQUOTE-SPLICING")  \
+    ALIZE_DEF(And, "AND")                           \
+    ALIZE_DEF(Or, "OR")                             \
+*/
+
+// -*- AstBase -*-
+class AstBase{
+public:
+    AstBase(AstKind kind): m_kind{kind}{}
+    virtual ~AstBase() = default;
+    AstKind kind() const { return this->m_kind; }
+    virtual Object eval([[maybe_unused]] Alize& alize) = 0;
+    virtual Str str(void) const = 0;
+    virtual Str repr(void) const = 0;
+
+protected:
+    AstKind m_kind;
+};
+
+// -*- Identifier AST
+// [_\-a-zA-Z0-9\:#~&]
+class IdentAst final: public AstBase{
+public:
+    explicit IdentAst(Token token);
+    ~IdentAst() = default;
+    Object eval([[maybe_unused]] Alize& alize) override;
+    Str str(void) const override;
+    Str repr(void) const override;
+    Str literal(void) const;
+
+private:
+    Token m_literal; // nil, true, false, *reserved-word*, *var-or-func-name*
+};
+
+// -*- Integer AST -*-
+// [-+](0b[01]+)|(0o[0-7]+)|(0x[0-9]+)
+class IntegerAst final: public AstBase{
+public:
+    explicit IntegerAst(Token token);
+    ~IntegerAst() = default;
+    Object eval([[maybe_unused]] Alize& alize) override;
+    Str str(void) const override;
+    Str repr(void) const override;
+    Str literal(void) const;
+
+private:
+    Str m_literal;
+};
+
+// -*- Float AST -*-
+// [+-][0-9]+\.[0-9]+[eE][+-][0-9]+
+class FloatAst final: public AstBase{
+public:
+    explicit FloatAst(Token token);
+    ~FloatAst() = default;
+    Object eval([[maybe_unused]] Alize& alize) override;
+    Str str(void) const override;
+    Str repr(void) const override;
+    Token literal();
+
+private:
+    Token m_token;
+};
+
+// -*- String AST -*-
+// "..."
+class StringAst final: public AstBase{
+public:
+    explicit StringAst(Token token);
+    ~StringAst() = default;
+    Object eval([[maybe_unused]] Alize& alize) override;
+    Str str(void) const override;
+    Str repr(void) const override;
+    Str literal(void) const;
+
+private:
+    Token m_token;
+};
+
+// -*- List AST -*-
+// (list ...)
+class ListAst final: public AstBase{
+public:
+    explicit ListAst(Vec<Token> tokens);
+    ~ListAst() = default;
+    Object eval([[maybe_unused]] Alize& alize) override;
+    Str str(void) const override;
+    Str repr(void) const override;
+
+private:
+    Vec<Token> m_vec;
+};
+
+// -*- Lambda AST -*-
+// (lambda params body)
+class LambdaAst final: public AstBase{
+public:
+    explicit LambdaAst(Vec<Token> params, Vec<Ast> asts);
+    ~LambdaAst() = default;
+    Object eval([[maybe_unused]] Alize& alize) override;
+    Str str(void) const override;
+    Str repr(void) const override;
+
+private:
+    Vec<Token> m_params;
+    Vec<Ast> m_body;
+};
+
+// -*- User-defined function AST -*-
+// (defun name params body)
+class FunAst final: public AstBase{
+public:
+    explicit FunAst(Token name, Vec<Token> params, Vec<Ast> body);
+    ~FunAst() = default;
+    Object eval([[maybe_unused]] Alize& alize) override;
+    Str str(void) const override;
+    Str repr(void) const override;
+
+private:
+    Token m_name;
+    Vec<Token> m_params;
+    Vec<Ast> m_body;
+};
+
+// -*- Macro AST -*-
+// (defmacro name params body)
+class MacroAst final: public AstBase{
+public:
+    explicit MacroAst(Token name, Vec<Token> params, Vec<Ast> body);
+    ~MacroAst() = default;
+    Object eval([[maybe_unused]] Alize& alize) override;
+    Str str(void) const override;
+    Str repr(void) const override;
+
+private:
+    Token m_name;
+    Vec<Token> m_params;
+    Vec<Ast> m_body;
+};
+
+// -*- If AST -*-
+// (if test ok alt)
+class IfAst final: public AstBase{
+public:
+    explicit IfAst(Ast test, Ast okay, Ast alt);
+    ~IfAst() = default;
+    Object eval([[maybe_unused]] Alize& alize) override;
+    Str str(void) const override;
+    Str repr(void) const override;
+
+private:
+    Ast m_test;
+    Ast m_okay;
+    Ast m_alt;
+};
+
+// -*- Define AST -*-
+// (define name sexpr)
+class DefineAst final: public AstBase{
+public:
+    explicit DefineAst(Token name, Ast ast);
+    ~DefineAst() = default;
+    Object eval([[maybe_unused]] Alize& alize) override;
+    Str str(void) const override;
+    Str repr(void) const override;
+
+private:
+    Token m_name;
+    Ast m_ast;
+};
+
+// -*- Progn AST -*-
+// (progn ...)
+class PrognAst final: public AstBase{
+public:
+    explicit PrognAst(Vec<Ast> body);
+    ~PrognAst() = default;
+    Object eval([[maybe_unused]] Alize& alize) override;
+    Str str(void) const override;
+    Str repr(void) const override;
+
+private:
+    Vec<Ast> m_body;
+};
+
+// -*- For AST -*-
+// (for (x xs) body)
+class ForAst final: public AstBase{
+public:
+    explicit ForAst(Vec<Ast> args, Vec<Ast> body);
+    ~ForAst() = default;
+    Object eval([[maybe_unused]] Alize& alize) override;
+    Str str(void) const override;
+    Str repr(void) const override;
+
+private:
+    Vec<Ast> m_args; // (x xs)
+    Vec<Ast> m_body; // body
+};
+
+// -*- Cond AST -*-
+// (cond (tst1 ast1) (tst2 ast2) ...  )
+class CondAst final: public AstBase{
+public:
+    explicit CondAst(Vec<Ast> clauses);
+    ~CondAst() = default;
+    Object eval([[maybe_unused]] Alize& alize) override;
+    Str str(void) const override;
+    Str repr(void) const override;
+
+private:
+    Vec<Ast> m_clauses;
+};
+
+// -*--------------*-
+// -*- Import AST -*-
+// -*--------------*-
+// (import modulename)
+class ImportAst final: public AstBase{
+public:
+    explicit ImportAst(Symbol sym);
+    ~ImportAst() = default;
+    Object eval([[maybe_unused]] Alize& alize) override;
+    Str str(void) const override;
+    Str repr(void) const override;
+
+private:
+    Symbol m_sym;
+    fs::path m_path;
+};
+
+
+// -*- Parser -*-
+class Parser final{
+private:
+    Tokenizer m_tokenizer;
+
+public:
+    Parser() = default;
+    explicit Parser(const Str& src);
+    explicit Parser(std::stringstream* stream);
+    Object parse(void);
+
+private:
+    Object parse_atom(void); // nil, true, false, integer, float, string
+    Object parse_list(void);
+    Object parse_fun(void);
+    Object parse_macro(void);
+    Object parse_define(void);
+    Object parse_lambda(void);
+    Object parse_progn(void);
+    Object parse_if(void);
+    Object parse_cond(void);
+    Object parse_import(void);
+
+    bool expect(AstKind kind);
+};
+
+// -*-
+namespace builtins{
+// -*-
+    Object fn_quote(Args argv);
+    Object fn_quasiquote(Args argv);
+    Object fn_unquote(Args argv);
+    Object fn_unquote_splicing(Args argv);
+    Object fn_and(Args argv);
+    Object fn_or(Args argv);
+    Object fn_not(Args argv);
+
+    Object fn_add(Args argv);
+    Object fn_sub(Args argv);
+    Object fn_mul(Args argv);
+    Object fn_mod(Args argv);
+    Object fn_div(Args argv);
+
+    Object fn_len(Args argv);
+    Object fn_get(Args argv);
+    Object fn_insert(Args argv);
+    Object fn_push(Args argv);
+    Object fn_pop(Args argv);
+    Object fn_index(Args argv);
+
+    Object fn_ltrim(Args argv);
+    Object fn_rtrim(Args argv);
+    Object fn_trim(Args argv);
+    Object fn_lower(Args argv);
+    Object fn_upper(Args argv);
+    Object fn_replace(Args argv);
+    Object fn_join(Args argv);
+    Object fn_split(Args argv);
+
+    Object fn_addpath(Args argv);
+    Object fn_println(Args argv);
+    Object fn_eprintln(Args argv);
+    Object fn_print(Args argv);
+    Object fn_eprint(Args argv);
+    Object fn_panic(Args argv);
+    Object fn_format(Args argv);
+    Object fn_random(Args argv);
+    Object fn_filter(Args argv);
+    Object fn_map(Args argv);
+    Object fn_zip(Args argv);
+
+    // -*- math -*-
+    Object fn_abs(Args argv);
+    Object fn_max(Args argv);
+    Object fn_min(Args argv);
+    Object fn_floor(Args argv);
+    Object fn_ceil(Args argv);
+    Object fn_round(Args argv);
+    Object fn_trunc(Args argv);
+    Object fn_sin(Args argv);
+    Object fn_cos(Args argv);
+    Object fn_tan(Args argv);
+    Object fn_asin(Args argv);
+    Object fn_acos(Args argv);
+    Object fn_atan(Args argv);
+    Object fn_atan2(Args argv);
+    Object fn_sinh(Args argv);
+    Object fn_cosh(Args argv);
+    Object fn_tanh(Args argv);
+    Object fn_asinh(Args argv);
+    Object fn_acosh(Args argv);
+    Object fn_atanh(Args argv);
+    Object fn_erf(Args argv);
+    Object fn_erfc(Args argv);
+    Object fn_gamma(Args argv);
+    Object fn_lgamma(Args argv);
+    Object fn_pow(Args argv);
+    Object fn_sqrt(Args argv);
+    Object fn_cbrt(Args argv);
+    Object fn_exp(Args argv);
+    Object fn_exp2(Args argv);
+    Object fn_expm1(Args argv);
+    Object fn_log(Args argv);
+    Object fn_log2(Args argv);
+    Object fn_log1p(Args argv);
+    Object fn_fma(Args argv);
+
+// -*-
+}
+
+// -*---------*-
+// -*- Alize -*-
+// -*---------*-
+class Alize{
+public:
+    Alize();
+    ~Alize() = default;
+
+    static void run(Vec<Str> argv);
+    static void repl(Vec<Str> argv);
+
+    static Env runtime;
+    static void initialize(void);
+
+private:
+    static Dict prelude;
+    static void initialize_prelude(void);
+};
+
+
+// -*----------------------------------------------------------------*-
+}//-*- end::namespace::alz                                          -*-
+// -*----------------------------------------------------------------*-
+
+#endif
