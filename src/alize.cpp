@@ -475,10 +475,12 @@ Object::operator ArrayList(){
     throw Error(Error::TypeError, stream.str());
 }
 
+// -*- Predicates -*-
+bool Object::is_nil(void) const{
+    return this->m_typekind == TypeKind::Nil;
+}
 
 /*
-// -*- Predicates -*-
-bool Object::is_nil(void) const{}
 bool Object::is_bool(void) const{}
 bool Object::is_integer(void) const{}
 bool Object::is_float(void) const{}
