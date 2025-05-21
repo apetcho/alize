@@ -291,12 +291,15 @@ Object::Object(Str val)
 : m_typekind{TypeKind::String}
 , m_value{val}{}
 
+// -*-
+Object::Object(Symbol val)
+: m_typekind{TypeKind::Sym}
+, m_value{val}{}
 
 
 
 
 /*
-Object::Object(Symbol val){}
 Object::Object(Str name, CFun cfun){}
 Object::Object(Closure closure){}
 Object::Object(ArrayList xs){}
