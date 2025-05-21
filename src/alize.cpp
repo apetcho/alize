@@ -264,23 +264,26 @@ const Ast& Closure::ast(void) const{
     return this->m_ast;
 }
 
-/*
 // -*----------*-
 // -*- Object -*-
 // -*----------*-
-Object::Object(){}
-Object::Object(bool){}
-Object::Object(i64){}
-Object::Object(f64){}
-Object::Object(Str){}
-Object::Object(Symbol){}
-Object::Object(Str, CFun){}
-Object::Object(Option<Str>, Closure){}
-Object::Object(ArrayList){}
+Object::Object()
+: m_typekind{TypeKind::Nil}
+, m_value{} {}
+
+/*
+Object::Object(bool val){}
+Object::Object(i64 val){}
+Object::Object(f64 val){}
+Object::Object(Str val){}
+Object::Object(Symbol val){}
+Object::Object(Str name, CFun cfun){}
+Object::Object(Closure closure){}
+Object::Object(ArrayList xs){}
 Object::Object(const Object& other){}
 Object::Object(Object&& other){}
-Object::Object& operator==(const Object& other){}
-Object::Object& operator==(Object&& other){}
+Object::Object& operator=(const Object& other){}
+Object::Object& operator=(Object&& other){}
 Object::~Object(){}
 
 // -*- type-cast -*-

@@ -144,15 +144,15 @@ class Object{
         Nil, Bool, Int, Float, String, Sym, Fn, Lambda, Fun, Macro, List,
     };
 public:
-    explicit Object();                       // Nil
-    explicit Object(bool);                   // Boolean
-    explicit Object(i64);                    // Integer
-    explicit Object(f64);                    // Floating point number
-    explicit Object(Str);                    // String literal
-    explicit Object(Symbol);                 // Identifier
-    explicit Object(Str, CFun);              // Builtin function
-    explicit Object(Option<Str>, Closure);   // Fun, Lambda, Macro
-    explicit Object(ArrayList);              // List
+    explicit Object();                          // Nil
+    explicit Object(bool);                      // Boolean
+    explicit Object(i64);                       // Integer
+    explicit Object(f64);                       // Floating point number
+    explicit Object(Str);                       // String literal
+    explicit Object(Symbol);                    // Identifier
+    explicit Object(Str, CFun);                 // Builtin function
+    explicit Object(Closure);                   // Fun, Lambda, Macro
+    explicit Object(ArrayList);                 // List
     explicit Object(const Object& other);
     Object(Object&& other);
     Object& operator=(const Object& other);
@@ -203,6 +203,7 @@ public:
 private:
     TypeKind m_typekind;
     Value m_value;
+    Option<Str> m_name{};
 };
 
 // -*-------*-
