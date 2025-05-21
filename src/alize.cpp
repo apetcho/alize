@@ -453,8 +453,18 @@ Object::operator CFun(){
     throw Error(Error::TypeError, stream.str());
 }
 
+// -*-
+Object::operator Closure(){
+    if(this->is_closure()){
+        auto closure = std::get<Closure>(this->m_value);
+        return closure;
+    }
+    std::stringstream stream;
+    stream << "cannot convert `" << this->type().data << "' into `builtin function'";
+    throw Error(Error::TypeError, stream.str());
+}
+
 /*
-Object::operator Closure(){}
 Object::operator ArrayList(){}
 
 // -*- Predicates -*-
