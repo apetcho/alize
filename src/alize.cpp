@@ -269,10 +269,14 @@ const Ast& Closure::ast(void) const{
 // -*----------*-
 Object::Object()
 : m_typekind{TypeKind::Nil}
-, m_value{} {}
+, m_value{}{}
+
+// -*-
+Object::Object(bool val)
+: m_typekind{TypeKind::Bool}
+, m_value{val}{}
 
 /*
-Object::Object(bool val){}
 Object::Object(i64 val){}
 Object::Object(f64 val){}
 Object::Object(Str val){}
