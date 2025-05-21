@@ -232,8 +232,34 @@ Str Closure::repr(void) const{
     return stream.str();
 }
 
+// -*-
+Str Closure::name(void) const{
+    Str result{};
+    if(this->is_lambda()){ result = ""; }
+    else if(this->is_function()){
+        auto ast = dynamic_cast<FunAst*>(this->m_ast.get());
+        if(ast != nullptr){ result = ast->name(); }
+        else{
+            throw Error(
+                Error::Kind::RuntimeError,
+                "unexpected error occurred while creating a `function`"
+            );
+        }
+    }else if(this->is_macro()){
+        auto ast = dynamic_cast<MacroAst*>(this->m_ast.get());
+        if(ast != nullptr){ result = ast->name(); }
+        else{
+            throw Error(
+                Error::Kind::RuntimeError,
+                "unexpected error occurred while creating a `macro`"
+            );
+        }
+    }
+
+    return result;
+}
+
 /*
-Str Closure::name(void) const{}
 const Ast& Closure::ast(void) const{}
 
 // -*----------*-
