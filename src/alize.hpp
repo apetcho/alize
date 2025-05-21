@@ -136,7 +136,7 @@ class Object{
     };
 
 #define ALIZE_VARIANTS  \
-    bool, i64, f64, Str, Symbol, CFun, Closure
+    bool, i64, f64, Str, Symbol, CFun, Closure, ArrayList
 
     using Value = std::variant<ALIZE_VARIANTS>;
 

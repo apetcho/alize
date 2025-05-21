@@ -312,8 +312,12 @@ Object::Object(Closure closure)
     else if(closure.is_macro()){ this->m_typekind = TypeKind::Macro; }
 }
 
+// -*-
+Object::Object(ArrayList xs)
+: m_typekind{TypeKind::List}
+, m_value{xs}{}
+
 /*
-Object::Object(ArrayList xs){}
 Object::Object(const Object& other){}
 Object::Object(Object&& other){}
 Object::Object& operator=(const Object& other){}
