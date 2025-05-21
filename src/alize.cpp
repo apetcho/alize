@@ -105,8 +105,12 @@ bool Closure::is_function(void) const{
     return this->m_kind == Closure::Kind::Fun;
 }
 
+// -*-
+bool Closure::is_lambda(void) const{
+    return this->m_kind == Closure::Kind::Lambda;
+}
+
 /*
-bool Closure::is_lambda(void) const{}
 bool Closure::is_macro(void) const{}
 Str Closure::str(void) const{}
 Str Closure::repr(void) const{}
