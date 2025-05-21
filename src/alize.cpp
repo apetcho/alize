@@ -303,8 +303,16 @@ Object::Object(CFun cfun)
 , m_value{cfun}{}
 
 
+// -*-
+Object::Object(Closure closure)
+: m_typekind{TypeKind::Fun}
+, m_value{closure}{
+    if(closure.is_function()){ this->m_typekind = TypeKind::Fun; }
+    else if(closure.is_lambda()){ this->m_typekind = TypeKind::Lambda; }
+    else if(closure.is_macro()){ this->m_typekind = TypeKind::Macro; }
+}
+
 /*
-Object::Object(Closure closure){}
 Object::Object(ArrayList xs){}
 Object::Object(const Object& other){}
 Object::Object(Object&& other){}
