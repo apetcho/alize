@@ -519,9 +519,12 @@ bool Object::is_closure(void) const{
     );
 }
 
-/*
-bool Object::is_list(void) const{}
+// -*-
+bool Object::is_list(void) const{
+    return this->m_typekind == TypeKind::List;
+}
 
+/*
 // -*- stringifiers -*-
 Str Object::str(void) const{}
 Str Object::repr(void) const{}
