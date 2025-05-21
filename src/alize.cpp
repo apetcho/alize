@@ -100,8 +100,12 @@ Object Closure::operator()(Vec<Object> argv, Env& env){
     return result;
 }
 
+// -*-
+bool Closure::is_function(void) const{
+    return this->m_kind == Closure::Kind::Fun;
+}
+
 /*
-bool Closure::is_function(void) const{}
 bool Closure::is_lambda(void) const{}
 bool Closure::is_macro(void) const{}
 Str Closure::str(void) const{}
