@@ -460,13 +460,23 @@ Object::operator Closure(){
         return closure;
     }
     std::stringstream stream;
-    stream << "cannot convert `" << this->type().data << "' into `builtin function'";
+    stream << "cannot convert `" << this->type().data << "' into `closure'";
     throw Error(Error::TypeError, stream.str());
 }
 
-/*
-Object::operator ArrayList(){}
+// -*-
+Object::operator ArrayList(){
+    if(this->is_list()){
+        auto vec = std::get<ArrayList>(this->m_value);
+        return vec;
+    }
+    std::stringstream stream;
+    stream << "cannot convert `" << this->type().data << "' into `closure'";
+    throw Error(Error::TypeError, stream.str());
+}
 
+
+/*
 // -*- Predicates -*-
 bool Object::is_nil(void) const{}
 bool Object::is_bool(void) const{}
