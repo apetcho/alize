@@ -150,7 +150,7 @@ public:
     explicit Object(f64);                       // Floating point number
     explicit Object(Str);                       // String literal
     explicit Object(Symbol);                    // Identifier
-    explicit Object(Str, CFun);                 // Builtin function
+    explicit Object(CFun);                      // Builtin function
     explicit Object(Closure);                   // Fun, Lambda, Macro
     explicit Object(ArrayList);                 // List
     explicit Object(const Object& other);
@@ -202,7 +202,6 @@ public:
 
 private:
     TypeKind m_typekind;
-    Option<Str> m_name{};
     Value m_value;
 };
 

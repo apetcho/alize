@@ -297,10 +297,13 @@ Object::Object(Symbol val)
 , m_value{val}{}
 
 
+// -*-
+Object::Object(CFun cfun)
+: m_typekind{TypeKind::Fn}
+, m_value{cfun}{}
 
 
 /*
-Object::Object(Str name, CFun cfun){}
 Object::Object(Closure closure){}
 Object::Object(ArrayList xs){}
 Object::Object(const Object& other){}
