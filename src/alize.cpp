@@ -495,8 +495,12 @@ bool Object::is_float(void) const{
     return this->m_typekind == TypeKind::Float;
 }
 
+// -*-
+bool Object::is_symbol(void) const{
+    return this->m_typekind == TypeKind::Sym;
+}
+
 /*
-bool Object::is_symbol(void) const{}
 bool Object::is_string(void) const{}
 bool Object::is_builtin_function(void) const{}
 bool Object::is_closure(void) const{}
