@@ -286,10 +286,16 @@ Object::Object(f64 val)
 : m_typekind{TypeKind::Float}
 , m_value{val}{}
 
+// -*-
+Object::Object(Str val)
+: m_typekind{TypeKind::String}
+, m_value{val}{}
+
+
+
 
 
 /*
-Object::Object(Str val){}
 Object::Object(Symbol val){}
 Object::Object(Str name, CFun cfun){}
 Object::Object(Closure closure){}
