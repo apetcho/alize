@@ -500,8 +500,12 @@ bool Object::is_symbol(void) const{
     return this->m_typekind == TypeKind::Sym;
 }
 
+// -*-
+bool Object::is_string(void) const{
+    return this->m_typekind == TypeKind::String;
+}
+
 /*
-bool Object::is_string(void) const{}
 bool Object::is_builtin_function(void) const{}
 bool Object::is_closure(void) const{}
 bool Object::is_list(void) const{}
