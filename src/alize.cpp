@@ -740,15 +740,46 @@ Object operator+(const Object& lhs, const Object& rhs){
             xs.emplace_back(*yptr);
         }
         result = Object(xs);
+    }else{
+        std::stringstream stream;
+        stream << "type mismatch. `+` is only applicable between `numbers`, ";
+        stream << " or `strings` or `lists`";
+        throw Error(Error::Kind::TypeError, stream.str());
     }
 
     return result;
 }
 
-
+// -*-
+Object operator-(const Object& lhs, const Object& rhs){
+    Object result{};
+    if(!(lhs.type()==rhs.type())){
+        std::stringstream stream;
+        stream << "type mismatch. `+` is only applicable between `numbers`, ";
+        stream << " or `strings` or `lists`";
+        throw Error(Error::Kind::TypeError, stream.str());
+    }
+    if(lhs.is_number()){
+        if(lhs.is_integer() && rhs.is_integer()){
+            auto x = std::get<i64>(lhs.m_value);
+            auto y = std::get<i64>(rhs.m_value);
+            result = Object((x - y));
+        }else{
+            auto x = static_cast<f64>(Object(lhs));
+            auto y = static_cast<f64>(Object(rhs));
+            result = Object((x - y));
+        }
+    }else{
+        std::stringstream stream;
+        stream << "type mismatch. `+` is only applicable between `numbers`, ";
+        stream << " or `strings` or `lists`";
+        throw Error(Error::Kind::TypeError, stream.str());
+    }
+    
+    return result;
+}
 
 /*
-Object operator-(const Object& lhs, const Object& rhs){}
 Object operator*(const Object& lhs, const Object& rhs){}
 Object operator/(const Object& lhs, const Object& rhs){}
 Object operator%(const Object& lhs, const Object& rhs){}
