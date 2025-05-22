@@ -7,7 +7,9 @@
 namespace alz{
 // -*-
 Tokenizer::Tokenizer(const Str& src)
-: m_src{src}, m_pos{usize{}}
+: m_src{src}
+, m_cur{'\0'}
+, m_pos{usize{}}
 , m_row{1}, m_col{1}{}
 
 // -*-
@@ -127,10 +129,11 @@ Token Tokenizer::next_token(void){
             token.row = this->m_row;
             token.col = this->m_col;
         }else{
-            token.kind = TokenKind::Colon;
-            token.lexeme = ":";
-            token.row = this->m_row;
-            token.col = this->m_col;
+            auto self = this->read_identifier();
+            token.kind = self.kind;
+            token.lexeme = self.lexeme;
+            token.row = self.row;
+            token.col = self.col;
         }
         break;
     case '+':{   // Plus
@@ -214,6 +217,63 @@ Token Tokenizer::next_token(void){
     return token;
 }
 
+// -*-
+Token Tokenizer::read_identifier(void){
+    static std::map<Str, TokenKind> _builtinIdentifiers = {
+        {"true", TokenKind::True},
+        {"false", TokenKind::False},
+        {"nil", TokenKind::Nil},
+        {"fun", TokenKind::Fun},
+        {"macro", TokenKind::Macro},
+        {"lambda", TokenKind::Lambda},
+        {"var", TokenKind::Var},
+        {"if", TokenKind::If},
+        {"for", TokenKind::For},
+        {"cond", TokenKind::Cond},
+        {"progn", TokenKind::Progn},
+        {"let", TokenKind::Let},
+    };
+    Str lexeme{};
+    auto c = static_cast<char>(this->m_cur);
+    if(!this->is_valid_identifier_start_char(c)){
+        std::stringstream stream;
+        stream << "invalid first identifier character '" << c << "'";
+        throw Error(Error::Kind::Default, stream.str());
+    }
+    lexeme = c;
+    if(this->is_eof()){
+        auto entry = _builtinIdentifiers.find(lexeme);
+        Token token{};
+        if(entry != _builtinIdentifiers.end()){
+            token.kind = entry->second;
+        }else{
+            token.kind = TokenKind::Ident;
+        }
+        token.lexeme = lexeme;
+        token.row = this->m_row;
+        token.col = this->m_col;
+        return token;
+    }
+    c = this->next();
+    while(this->is_valid_identifier_char(c)){
+        lexeme += c;
+        if(this->is_eof()){ break;}
+        c = this->next();
+    }
+    auto entry = _builtinIdentifiers.find(lexeme);
+    Token token{};
+    if(entry != _builtinIdentifiers.end()){
+        token.kind = entry->second;
+    }else{
+        token.kind = TokenKind::Ident;
+    }
+    token.lexeme = lexeme;
+    token.row = this->m_row;
+    token.col = this->m_col;
+
+    return token;
+}
+
 /*
 class Tokenizer{
 private:
@@ -227,10 +287,9 @@ public:
     ~Tokenizer() = default;
 
 private:
-Token Tokenizer::read_ident(void){}
-Token Tokenizer::read_bool(void){}
-Token Tokenizer::read_integer(void){}
-Token Tokenizer::read_float(void){}
+// Token Tokenizer::read_bool(void){}
+// Token Tokenizer::read_integer(void){}
+// Token Tokenizer::read_float(void){}
 Token Tokenizer::read_number(void){}
 Token Tokenizer::read_str(void){}
     //Token read_list(void);

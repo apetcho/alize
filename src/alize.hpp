@@ -232,15 +232,18 @@ private:
 // -*- Token & Tokenizer -*-
 // -*---------------------*-
 #define ALIZE_RESERVED_WORDS()                      \
+    ALIZE_DEF(Nil, "nil")                           \
+    ALIZE_DEF(True, "true")                         \
+    ALIZE_DEF(False, "false")                       \
     ALIZE_DEF(If, "if")                             \
-    ALIZE_DEF(Defun, "defun")                       \
-    ALIZE_DEF(Define, "define")                     \
+    ALIZE_DEF(Fun, "fun")                           \
+    ALIZE_DEF(Var, "var")                           \
     ALIZE_DEF(Macro, "macro")                       \
     ALIZE_DEF(Lambda, "lambda")                     \
-    ALIZE_DEF(And, "and")                           \
-    ALIZE_DEF(Or, "or")                             \
     ALIZE_DEF(For, "for")                           \
     ALIZE_DEF(Cond, "cond")                         \
+    ALIZE_DEF(Progn, "progn")                       \
+    ALIZE_DEF(Let, "let")                           \
     ALIZE_DEF(Import, "import")
 
 
@@ -248,8 +251,6 @@ private:
     ALIZE_DEF(Undef, "UNDEF")\
     ALIZE_DEF(Eof, "EOF")                   \
     ALIZE_DEF(Ident, "IDENTIFIER")          \
-    ALIZE_DEF(Bool, "BOOLEAN-LITERAL")      \
-    ALIZE_DEF(Nil, "NIL-LITERAL")           \
     ALIZE_DEF(Integer, "INTEGER-LITERAL")   \
     ALIZE_DEF(Float, "FLOAT-LITERAL")       \
     ALIZE_DEF(String, "STRING-LITERAL")     \
@@ -293,6 +294,7 @@ struct Token final{
 class Tokenizer final{
 private:
     Str m_src;
+    i32 m_cur;
     i32 m_pos;
     i32 m_row;
     i32 m_col;
@@ -307,15 +309,16 @@ public:
 private:
     Token next_token(void);
     Token read_identifier(void);
-    Token read_bool(void);
-    Token read_integer(void);
-    Token read_float(void);
+    // Token read_bool(void);
+    // Token read_integer(void);
+    // Token read_float(void);
     Token read_number(void);
     Token read_str(void);
     //Token read_list(void);
     i32 next(void);
     char peek();
     bool is_valid_identifier_start_char(int c);
+    bool is_valid_identifier_char(int c);
     void skip_whitespace(void);
     void skip_comment(void);
     bool match(const Str& ident);
@@ -336,7 +339,7 @@ private:
     ALIZE_DEF(Fun, "FUN")                           \
     ALIZE_DEF(Macro, "MACRO")                       \
     ALIZE_DEF(If, "IF")                             \
-    ALIZE_DEF(Define, "DEFINE")                     \
+    ALIZE_DEF(Var, "VAR")                           \
     ALIZE_DEF(Progn, "PROGN")                       \
     ALIZE_DEF(For, "FOR")                           \
     ALIZE_DEF(Cond, "COND")                         \
@@ -531,10 +534,10 @@ private:
 
 // -*- Define AST -*-
 // (define name sexpr)
-class DefineAst final: public AstBase{
+class VarAst final: public AstBase{
 public:
-    explicit DefineAst(Token name, Ast ast);
-    ~DefineAst() = default;
+    explicit VarAst(Token name, Ast ast);
+    ~VarAst() = default;
     Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
