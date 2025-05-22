@@ -50,7 +50,7 @@ Object Closure::operator()(Vec<Object> argv, Env& env){
             throw Error(Error::SyntaxError, "arguments count mismatch");
         }
         auto scope = ast->scope();
-        scope.set_parent(&env);
+        scope.parent() = &env;
         for(auto i=0; i < params.size(); i++){
             auto key = static_cast<Str>(params[i]);
             Object val(argv[i]);
@@ -70,7 +70,8 @@ Object Closure::operator()(Vec<Object> argv, Env& env){
             throw Error(Error::SyntaxError, "arguments count mismatch");
         }
         auto scope = ast->scope();
-        scope.set_parent(&env);
+        // scope.set_parent(&env);
+        scope.parent() = &env;
         for(auto i=0; i < params.size(); i++){
             auto key = static_cast<Str>(params[i]);
             Object val(argv[i]);
@@ -90,7 +91,8 @@ Object Closure::operator()(Vec<Object> argv, Env& env){
             throw Error(Error::SyntaxError, "arguments count mismatch");
         }
         auto scope = ast->scope();
-        scope.set_parent(&env);
+        // scope.set_parent(&env);
+        scope.parent() = &env;
         for(auto i=0; i < params.size(); i++){
             auto key = static_cast<Str>(params[i]);
             Object val(argv[i]);
@@ -977,10 +979,10 @@ bool Env::contains(const Str key){
     }
 }
 
-/*
-void Env::set_parent(Env* parent){}
-
-*/
+// -*-
+Env*& Env::parent(void){
+    return this->m_parent;
+}
 
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::alz                                          -*-

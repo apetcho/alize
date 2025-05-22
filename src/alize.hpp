@@ -221,7 +221,7 @@ public:
     void update(Str key, const Object& val);
     Object get(Str key);
     bool contains(const Str key);
-    void set_parent(Env* parent);
+    Env*& parent(void);
 private:
     Dict m_bindings;
     Env* m_parent;
