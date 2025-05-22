@@ -915,8 +915,12 @@ Symbol Object::type(void) const{
 Env::Env()
 : m_bindings{}, m_parent{nullptr} {}
 
+// -*-
+Env::Env(Env* parent)
+: m_bindings{}, m_parent{parent}{}
+
+
 /*
-Env::Env(Env* parent){}
 Env::Env(const Env& other){}
 Env::~Env(){}
 void Env::put(Str key, const Object& val){}
