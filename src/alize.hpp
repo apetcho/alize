@@ -305,19 +305,21 @@ public:
     Vec<Token> tokenize(void);
 
 private:
-    Token read_ident(void);
+    Token next_token(void);
+    Token read_identifier(void);
     Token read_bool(void);
     Token read_integer(void);
     Token read_float(void);
+    Token read_number(void);
     Token read_str(void);
     //Token read_list(void);
-    Token next_token(void);
     i32 next(void);
     char peek();
+    bool is_valid_identifier_start_char(int c);
     void skip_whitespace(void);
     void skip_comment(void);
-    bool match(const Str& ident); 
-    bool is_eof(void);   
+    bool match(const Str& ident);
+    bool is_eof(void);
 };
 
 // -*------------------------*-

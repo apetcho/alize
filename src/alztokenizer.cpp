@@ -21,6 +21,199 @@ Vec<Token> Tokenizer::tokenize(void){
     return tokens;
 }
 
+// -*-
+Token Tokenizer::next_token(void){
+    auto c = this->next();
+    while(std::isspace(c) || !this->is_eof()){
+        c = this->next();
+    }
+    if(c == ';'){this->skip_comment(); }
+    if(this->is_eof()){ return Token(TokenKind::Eof, ""); }
+    Token token{};
+    switch(c){
+    case ',':   // unquote, unquote-splicing ',@'
+        if(this->m_src[this->m_pos+1] == '@'){
+            [[maybe_unused]] auto _ = this->next();
+            token.kind = TokenKind::UnquoteSplicing;
+            token.lexeme = ",@";
+            token.row = this->m_row;
+            token.col = this->m_col;
+        }else{
+            token.kind = TokenKind::Unquote;
+            token.lexeme = ",";
+            token.row = this->m_row;
+            token.col = this->m_col;
+        }
+        break;
+    case '\'':  // quote
+        token.kind = TokenKind::Quote;
+        token.lexeme = "'";
+        token.row = this->m_row;
+        token.col = this->m_col;
+        break;
+    case '`':   // quasiquote
+        token.kind = TokenKind::Quasiquote;
+        token.lexeme = "`";
+        token.row = this->m_row;
+        token.col = this->m_col;
+        break;
+    case '"':{   // string-literal, processing escape-characters
+            auto self = this->read_str();
+            token.kind = TokenKind::String;
+            token.lexeme = self.lexeme;
+            token.row = self.row;
+            token.col = self.col;
+        }
+        break;
+    case '.':   // dot
+        token.kind = TokenKind::Dot;
+        token.lexeme = ",";
+        token.row = this->m_row;
+        token.col = this->m_col;
+        break;
+    case '\\':{  // escape-character
+            auto _c = this->peek();
+            switch(_c){
+            case 'n':
+                this->next();
+                token.kind = TokenKind::String;
+                token.lexeme = "\n";
+                token.row = this->m_row;
+                token.col = this->m_col;
+                break;
+            case 't':
+                this->next();
+                token.kind = TokenKind::String;
+                token.lexeme = "\t";
+                token.row = this->m_row;
+                token.col = this->m_col;
+                break;
+            case 'f':
+                this->next();
+                token.kind = TokenKind::String;
+                token.lexeme = "\f";
+                token.row = this->m_row;
+                token.col = this->m_col;
+                break;
+            case 'r':
+                this->next();
+                token.kind = TokenKind::String;
+                token.lexeme = "\r";
+                token.row = this->m_row;
+                token.col = this->m_col;
+                break;
+            case '\\':
+                this->next();
+                token.kind = TokenKind::String;
+                token.lexeme = "\\";
+                token.row = this->m_row;
+                token.col = this->m_col;
+                break;
+            default:{
+                    std::stringstream stream;
+                    stream << "invalid escape-character at Line ";
+                    stream << this->m_row << " and column " << this->m_col;
+                    throw Error(Error::Kind::SyntaxError, stream.str());
+                }
+                break;
+            }
+        }
+        break;
+    case ':':   // Colon, DColon
+        if(this->peek()==':'){
+            this->next();
+            token.kind = TokenKind::DColon;
+            token.lexeme = "::";
+            token.row = this->m_row;
+            token.col = this->m_col;
+        }else{
+            token.kind = TokenKind::Colon;
+            token.lexeme = ":";
+            token.row = this->m_row;
+            token.col = this->m_col;
+        }
+        break;
+    case '+':{   // Plus
+        if(std::isdigit(this->peek())){
+                auto self = this->read_number();
+                token.kind = self.kind;
+                token.lexeme = self.lexeme;
+                token.row = self.row;
+                token.col = self.col;
+            }
+            else{
+                token.kind = TokenKind::Minus;
+                token.lexeme = "+";
+                token.row = this->m_row;
+                token.col = this->m_col;
+            }
+        }
+        break;
+    case '-':{   // Minus
+            if(std::isdigit(this->peek())){
+                auto self = this->read_number();
+                token.kind = self.kind;
+                token.lexeme = self.lexeme;
+                token.row = self.row;
+                token.col = self.col;
+            }
+            else{
+                token.kind = TokenKind::Minus;
+                token.lexeme = "-";
+                token.row = this->m_row;
+                token.col = this->m_col;
+            }
+        }
+        break;
+    case '/':   // Div
+        token.kind = TokenKind::Div;
+        token.lexeme = "/";
+        token.row = this->m_row;
+        token.col = this->m_col;
+        break;
+    case '%':   // Mod
+        token.kind = TokenKind::Mod;
+        token.lexeme = "%";
+        token.row = this->m_row;
+        token.col = this->m_col;
+        break;
+    case '*':   // Mul
+        token.kind = TokenKind::Mul;
+        token.lexeme = "*";
+        token.row = this->m_row;
+        token.col = this->m_col;
+        break;
+    default:
+        // numbers
+        // identifiers:
+        //      true, false, nil,
+        //      fun, var, macro, lambda, if, progn, cond, import
+        //      for, let, <<BuiltinFunctionName>>, <<BuiltinVariableName>>,
+        //      <<UserDefinedFunctionOrMacroName>>, <<UserDefinedVaraibaleName>>
+        if(std::isdigit(c)){
+            auto self = this->read_number();
+            token.kind = self.kind;
+            token.lexeme = self.lexeme;
+            token.row = self.row;
+            token.col = self.col;
+        }else if(this->is_valid_identifier_start_char(c)){
+            auto self = this->read_identifier();
+            token.kind = self.kind;
+            token.lexeme = self.lexeme;
+            token.row = self.row;
+            token.col = self.col;
+        }else{
+            std::stringstream stream;
+            stream << "error while tokenizing at Line " << this->m_row;
+            stream << " and column " << this->m_col;
+            throw Error(Error::Kind::SyntaxError, stream.str());
+        }
+        break;
+    }
+
+    return token;
+}
+
 /*
 class Tokenizer{
 private:
@@ -33,18 +226,20 @@ public:
     Tokenizer() = default;
     ~Tokenizer() = default;
 
-
 private:
 Token Tokenizer::read_ident(void){}
 Token Tokenizer::read_bool(void){}
 Token Tokenizer::read_integer(void){}
 Token Tokenizer::read_float(void){}
+Token Tokenizer::read_number(void){}
 Token Tokenizer::read_str(void){}
     //Token read_list(void);
+i32 Tokenizer::next(void){}
 char Tokenizer::peek(){}
 void Tokenizer::skip_whitespace(void){}
 void Tokenizer::skip_comment(void){}
 bool Tokenizer::match(const Str& ident){}
+bool Tokenizer::is_eof(void){}
 };
 
 */
