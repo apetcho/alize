@@ -697,9 +697,19 @@ Object& Object::operator+(){
     return *this;
 }
 
-/*
-Object& Object::operator~(){}
+// -*-
+Object& Object::operator~(){
+    if(!this->is_integer()){
+        std::stringstream stream;
+        stream << "cannot only apply `not` to integer";
+        throw Error(Error::Kind::TypeError, stream.str());
+    }
+    auto num = std::get<i64>(this->m_value);
+    this->m_value = (~num);
+    return *this;
+}
 
+/*
 // -*- binary-operator: {-, +, *, /, %, and, or,} -*-
 Object operator+(const Object& lhs, const Object& rhs){}
 Object operator-(const Object& lhs, const Object& rhs){}
