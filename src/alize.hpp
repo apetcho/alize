@@ -74,7 +74,7 @@ using Args = Vec<Object>;
 // -*-
 class Error final: std::runtime_error{
 public:
-    enum Kind{Default, TypeError, ValueError, SyntaxError, RuntimeError};
+    enum class Kind{Default, TypeError, ValueError, SyntaxError, RuntimeError};
     explicit Error(const Str& msg);
     explicit Error(Error::Kind kind, const Str& msg);
     ~Error() = default;

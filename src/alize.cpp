@@ -47,7 +47,7 @@ Object Closure::operator()(Vec<Object> argv, Env& env){
         }
         auto params = ast->params();
         if(params.size() != argv.size()){
-            throw Error(Error::SyntaxError, "arguments count mismatch");
+            throw Error(Error::Kind::SyntaxError, "arguments count mismatch");
         }
         auto scope = ast->scope();
         scope.parent() = &env;
@@ -67,7 +67,7 @@ Object Closure::operator()(Vec<Object> argv, Env& env){
         }
         auto params = ast->params();
         if(params.size() != argv.size()){
-            throw Error(Error::SyntaxError, "arguments count mismatch");
+            throw Error(Error::Kind::SyntaxError, "arguments count mismatch");
         }
         auto scope = ast->scope();
         // scope.set_parent(&env);
@@ -88,7 +88,7 @@ Object Closure::operator()(Vec<Object> argv, Env& env){
         }
         auto params = ast->params();
         if(params.size() != argv.size()){
-            throw Error(Error::SyntaxError, "arguments count mismatch");
+            throw Error(Error::Kind::SyntaxError, "arguments count mismatch");
         }
         auto scope = ast->scope();
         // scope.set_parent(&env);
@@ -400,7 +400,7 @@ Object::operator i64(){
     }
     std::stringstream stream;
     stream << "cannot convert `" << this->type().data << "' into `integer'";
-    throw Error(Error::TypeError, stream.str());
+    throw Error(Error::Kind::TypeError, stream.str());
 }
 
 // -*-
@@ -419,7 +419,7 @@ Object::operator f64(){
     }
     std::stringstream stream;
     stream << "cannot convert `" << this->type().data << "' into `float'";
-    throw Error(Error::TypeError, stream.str());
+    throw Error(Error::Kind::TypeError, stream.str());
 }
 
 // -*-
@@ -430,7 +430,7 @@ Object::operator Str(){
     }
     std::stringstream stream;
     stream << "cannot convert `" << this->type().data << "' into `string'";
-    throw Error(Error::TypeError, stream.str());
+    throw Error(Error::Kind::TypeError, stream.str());
 }
 
 // -*-
@@ -441,7 +441,7 @@ Object::operator Symbol(){
     }
     std::stringstream stream;
     stream << "cannot convert `" << this->type().data << "' into `symbol'";
-    throw Error(Error::TypeError, stream.str());
+    throw Error(Error::Kind::TypeError, stream.str());
 }
 
 // -*-
@@ -452,7 +452,7 @@ Object::operator CFun(){
     }
     std::stringstream stream;
     stream << "cannot convert `" << this->type().data << "' into `builtin function'";
-    throw Error(Error::TypeError, stream.str());
+    throw Error(Error::Kind::TypeError, stream.str());
 }
 
 // -*-
@@ -463,7 +463,7 @@ Object::operator Closure(){
     }
     std::stringstream stream;
     stream << "cannot convert `" << this->type().data << "' into `closure'";
-    throw Error(Error::TypeError, stream.str());
+    throw Error(Error::Kind::TypeError, stream.str());
 }
 
 // -*-
@@ -474,7 +474,7 @@ Object::operator ArrayList(){
     }
     std::stringstream stream;
     stream << "cannot convert `" << this->type().data << "' into `closure'";
-    throw Error(Error::TypeError, stream.str());
+    throw Error(Error::Kind::TypeError, stream.str());
 }
 
 // -*- Predicates -*-
@@ -905,7 +905,7 @@ Symbol Object::type(void) const{
 
     auto entry = myTypes.find(this->m_typekind);
     if(entry == myTypes.end()){
-        throw Error(Error::Default, "unknown type");
+        throw Error(Error::Kind::Default, "unknown type");
     }
     return entry->second;
 }
@@ -987,24 +987,36 @@ Env*& Env::parent(void){
 // -*---------*-
 // -*- Error -*-
 // -*---------*-
+static std::map<Error::Kind, Str> _myErrors = {
+    {Error::Kind::Default, "Error"},
+    {Error::Kind::ValueError, "ValueError"},
+    {Error::Kind::TypeError, "TypeError"},
+    {Error::Kind::SyntaxError, "SyntaxError"},
+    {Error::Kind::RuntimeError, "RuntimeError"},
+};
+
+
 Error::Error(const Str& msg)
 : std::runtime_error(msg)
 , m_kind{Error::Kind::Default} {}
 
-/*
-class Error:: final: std::runtime_error{
-public:
-    enum Kind{Default, TypeError, ValueError, SyntaxError, RuntimeError};
-Error::Error(Error::Kind kind, const Str& msg){}
-~Error() = default;
-const char* Error::what(void) const noexcept{}
-Str Error::describe(void) const{}
+// -*-
+Error::Error(Error::Kind kind, const Str& msg)
+: std::runtime_error(msg)
+, m_kind{kind}{}
 
-private:
-    Error::Kind m_kind;
-    Str m_msg;
-};
-*/
+// -*-
+const char* Error::what(void) const noexcept{
+    return std::runtime_error::what();
+}
+
+// -*-
+Str Error::describe(void) const{
+    std::stringstream stream;
+    auto name = _myErrors.find(this->m_kind)->second;
+    stream << name << ": " << this->what();
+    return stream.str();
+}
 
 
 // -*----------------------------------------------------------------*-
