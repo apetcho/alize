@@ -874,12 +874,17 @@ Object operator%(const Object& lhs, const Object& rhs){
 Object operator||(const Object& lhs, const Object& rhs){
     auto x = static_cast<bool>(Object(lhs));
     auto y = static_cast<bool>(Object(rhs));
-    return (x || y);
+    return Object((x || y));
+}
+
+// -*-
+Object operator&&(const Object& lhs, const Object& rhs){
+    auto x = static_cast<bool>(Object(lhs));
+    auto y = static_cast<bool>(Object(rhs));
+    return Object((x && y));
 }
 
 /*
-Object operator&&(const Object& lhs, const Object& rhs){}
-
 // -*- miscelaneous methods -*-
 Symbol Object::type(void) const{}
 
