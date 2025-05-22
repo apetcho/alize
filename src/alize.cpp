@@ -925,10 +925,12 @@ Env::Env(const Env& other)
 , m_parent{other.m_parent}
 {}
 
+// -*-
+void Env::put(Str key, const Object& val){
+    this->m_bindings[key] = val;
+}
 
 /*
-Env::~Env(){}
-void Env::put(Str key, const Object& val){}
 void Env::update(Str key, const Object& val){}
 Object Env::get(Str key){}
 bool Env::contains(const Str key){}
