@@ -172,6 +172,9 @@ public:
     bool is_bool(void) const;
     bool is_integer(void) const;
     bool is_float(void) const;
+    bool is_number(void) const{
+        return this->is_integer() || this->is_float();
+    }
     bool is_symbol(void) const;
     bool is_string(void) const;
     bool is_builtin_function(void) const;

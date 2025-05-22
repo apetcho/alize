@@ -669,9 +669,25 @@ Str Object::repr(void) const{
 
     return stream.str();
 }
-/*    
+
 // -*- unary-operator: {-, +, ~, } -*-
-Object& Object::operator-(){}
+Object& Object::operator-(){
+    if(!this->is_number()){
+        std::stringstream stream;
+        stream << "cannot negate object of type `" << this->type().data << "'";
+        throw Error(Error::Kind::TypeError, stream.str());
+    }
+    if(this->is_integer()){
+        auto num = std::get<i64>(this->m_value);
+        this->m_value = -num;
+    }else{
+        auto num = std::get<f64>(this->m_value);
+        this->m_value = -num;
+    }
+    return *this;
+}
+
+/*
 Object& Object::operator+(){}
 Object& Object::operator~(){}
 
