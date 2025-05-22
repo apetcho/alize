@@ -884,11 +884,31 @@ Object operator&&(const Object& lhs, const Object& rhs){
     return Object((x && y));
 }
 
-/*
+// -*-
 // -*- miscelaneous methods -*-
-Symbol Object::type(void) const{}
+Symbol Object::type(void) const{
+    Symbol result{};
+    static const std::map<TypeKind, Symbol> myTypes = {
+        {TypeKind::Nil, Symbol("nil")},
+        {TypeKind::Bool, Symbol("bool")},
+        {TypeKind::Int, Symbol("integer")},
+        {TypeKind::Float, Symbol("float")},
+        {TypeKind::String, Symbol("string")},
+        {TypeKind::Sym, Symbol("symbol")},
+        {TypeKind::Fn, Symbol("function")},
+        {TypeKind::Fun, Symbol("function")},
+        {TypeKind::Macro, Symbol("macro")},
+        {TypeKind::Lambda, Symbol("lambda")},
+    };
 
+    auto entry = myTypes.find(this->m_typekind);
+    if(entry == myTypes.end()){
+        throw Error(Error::Default, "unknown type");
+    }
+    return entry->second;
+}
 
+/*
 // -*-------*-
 // -*- Env -*-
 // -*-------*-
