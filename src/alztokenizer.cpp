@@ -77,35 +77,35 @@ Token Tokenizer::next_token(void){
             auto _c = this->peek();
             switch(_c){
             case 'n':
-                this->next();
+                this->advance();
                 token.kind = TokenKind::String;
                 token.lexeme = "\n";
                 token.row = this->m_row;
                 token.col = this->m_col;
                 break;
             case 't':
-                this->next();
+                this->advance();
                 token.kind = TokenKind::String;
                 token.lexeme = "\t";
                 token.row = this->m_row;
                 token.col = this->m_col;
                 break;
             case 'f':
-                this->next();
+                this->advance();
                 token.kind = TokenKind::String;
                 token.lexeme = "\f";
                 token.row = this->m_row;
                 token.col = this->m_col;
                 break;
             case 'r':
-                this->next();
+                this->advance();
                 token.kind = TokenKind::String;
                 token.lexeme = "\r";
                 token.row = this->m_row;
                 token.col = this->m_col;
                 break;
             case '\\':
-                this->next();
+                this->advance();
                 token.kind = TokenKind::String;
                 token.lexeme = "\\";
                 token.row = this->m_row;
@@ -123,7 +123,7 @@ Token Tokenizer::next_token(void){
         break;
     case ':':   // Colon, DColon
         if(this->peek()==':'){
-            this->next();
+            this->advance();
             token.kind = TokenKind::DColon;
             token.lexeme = "::";
             token.row = this->m_row;
@@ -156,7 +156,7 @@ Token Tokenizer::next_token(void){
             if(std::isdigit(this->peek())){
                 auto self = this->read_number();
                 token.kind = self.kind;
-                token.lexeme = self.lexeme;
+                token.lexeme = Str{"-"} + self.lexeme;
                 token.row = self.row;
                 token.col = self.col;
             }
@@ -274,6 +274,133 @@ Token Tokenizer::read_identifier(void){
     return token;
 }
 
+// -*-
+Token Tokenizer::read_number(void){
+    bool isFloating = false;
+    auto toChar = [](i32 n){
+        return static_cast<char>(n);
+    };
+    auto c = toChar(this->m_cur);
+    auto row = this->m_row;
+    auto col = this->m_col;
+    Token token{};
+    token.row = row;
+    token.col = col;
+    // -*- number-format:
+    //  <mantissa>[.]<fractional>[eE]<exponent>
+    Str lexeme{};
+    // (01) mantissa
+    while(std::isdigit(c) && !this->is_eof()){
+        lexeme += c;
+        c = toChar(this->next());
+    }
+    if(this->is_eof()){
+        // Token is an integer
+        token.kind = TokenKind::Integer;
+        token.lexeme = lexeme;
+        return token;
+    }
+    // or maybe integer in binary|octal|hexadecimal format
+    if(c == 'b'){ // binary format
+        lexeme += 'b';
+        this->advance();
+        c = toChar(this->next());
+        if(!(c=='0' || c=='1')){
+            throw Error(Error::Kind::SyntaxError, "malfomed integer in binary format");
+        }
+        while((Str{"01"}.find(c) != Str::npos) && !this->is_eof()){
+            lexeme += c;
+            c = toChar(this->next());
+        }
+        token.kind = TokenKind::Integer;
+        token.lexeme = lexeme;
+        return token;
+    }
+    if(c == 'o'){ // octal format
+        lexeme += 'o';
+        this->advance();
+        Str octals = "01234567";
+        c = toChar(this->next());
+        if(octals.find(c) == Str::npos){
+            throw Error(Error::Kind::SyntaxError, "malfomed integer in octal format");
+        }
+        while((octals.find(c) != Str::npos) && !this->is_eof()){
+            lexeme += c;
+            c = toChar(this->next());
+        }
+        token.kind = TokenKind::Integer;
+        token.lexeme = lexeme;
+        return token;
+    }
+    if(c == 'x'){ // hexadecimal format
+        lexeme += 'b';
+        this->advance();
+        Str hexadecs = "0123456789abcdefABCDEF";
+        c = toChar(this->next());
+        if(hexadecs.find(c) == Str::npos){
+            throw Error(Error::Kind::SyntaxError, "malfomed integer in hexadecimal format");
+        }
+        while((hexadecs.find(c)!= Str::npos) && !this->is_eof()){
+            lexeme += c;
+            c = toChar(this->next());
+        }
+        token.kind = TokenKind::Integer;
+        token.lexeme = lexeme;
+        return token;
+    }
+    // (02) potential decimal-point
+    if(c == '.'){
+        lexeme += '.';
+        isFloating = true;
+        this->advance();
+    }
+    if(this->is_eof()){
+        token.kind = isFloating? TokenKind::Float : TokenKind::Integer;
+        token.lexeme = lexeme;
+        return token;
+    }
+    // (03) fractional part
+    c = toChar(this->next());
+    while(std::isdigit(c) && !this->is_eof()){
+        lexeme += c;
+        c = toChar(this->next());
+    }
+    // (04) potential 'e' or 'E'
+    if(c == 'e' || c == 'E'){
+        lexeme += c;
+        isFloating = true;
+        this->advance();
+        if(this->is_eof()){
+            token.kind = TokenKind::Float;
+            token.lexeme = lexeme;
+            return token;
+        }
+        c = toChar(this->next());
+    }
+    // possibly '+' or '-'
+    if(c == '+' || c == '-'){
+        lexeme += c;
+        this->advance();
+        if(this->is_eof()){
+            throw Error(Error::Kind::SyntaxError, "malformed floating-point number");
+        }
+        c = toChar(this->next());
+    }
+    if(std::isdigit(c)){
+        while(std::isdigit(c) && !this->is_eof()){
+            lexeme += c;
+            c = toChar(this->next());
+        }
+    }else{
+        throw Error(Error::Kind::SyntaxError, "malformed floating-point number");
+    }
+    
+    token.kind = isFloating? TokenKind::Float : TokenKind::Integer;
+    token.lexeme = lexeme;
+
+    return token;
+}
+
 /*
 class Tokenizer{
 private:
@@ -290,7 +417,6 @@ private:
 // Token Tokenizer::read_bool(void){}
 // Token Tokenizer::read_integer(void){}
 // Token Tokenizer::read_float(void){}
-Token Tokenizer::read_number(void){}
 Token Tokenizer::read_str(void){}
     //Token read_list(void);
 i32 Tokenizer::next(void){}

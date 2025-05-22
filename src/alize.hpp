@@ -316,6 +316,7 @@ private:
     Token read_str(void);
     //Token read_list(void);
     i32 next(void);
+    void advance(void);
     char peek();
     bool is_valid_identifier_start_char(int c);
     bool is_valid_identifier_char(int c);
