@@ -984,6 +984,29 @@ Env*& Env::parent(void){
     return this->m_parent;
 }
 
+// -*---------*-
+// -*- Error -*-
+// -*---------*-
+Error::Error(const Str& msg)
+: std::runtime_error(msg)
+, m_kind{Error::Kind::Default} {}
+
+/*
+class Error:: final: std::runtime_error{
+public:
+    enum Kind{Default, TypeError, ValueError, SyntaxError, RuntimeError};
+Error::Error(Error::Kind kind, const Str& msg){}
+~Error() = default;
+const char* Error::what(void) const noexcept{}
+Str Error::describe(void) const{}
+
+private:
+    Error::Kind m_kind;
+    Str m_msg;
+};
+*/
+
+
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::alz                                          -*-
 // -*----------------------------------------------------------------*-

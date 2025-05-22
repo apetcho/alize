@@ -83,7 +83,6 @@ public:
 
 private:
     Error::Kind m_kind;
-    Str m_msg;
 };
 
 // -*-
