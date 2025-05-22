@@ -1,5 +1,5 @@
 #include "alize.hpp"
-
+#include<cctype>
 
 // -*----------------------------------------------------------------*-
 // -*- begin::namespace::alz                                        -*-
@@ -7,8 +7,19 @@
 namespace alz{
 // -*-
 Tokenizer::Tokenizer(const Str& src)
-: m_src{src}
-, m_pos{usize{}}{}
+: m_src{src}, m_pos{usize{}}
+, m_row{1}, m_col{1}{}
+
+// -*-
+Vec<Token> Tokenizer::tokenize(void){
+    Vec<Token> tokens{};
+    auto token = this->next_token();
+    while(token.kind != TokenKind::Eof){
+        tokens.push_back(token);
+        token = this->next_token();
+    }
+    return tokens;
+}
 
 /*
 class Tokenizer{
@@ -22,7 +33,6 @@ public:
     Tokenizer() = default;
     ~Tokenizer() = default;
 
-Vec<Token> Tokenizer::tokenize(){}
 
 private:
 Token Tokenizer::read_ident(void){}

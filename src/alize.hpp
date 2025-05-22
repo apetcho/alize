@@ -294,13 +294,15 @@ class Tokenizer final{
 private:
     Str m_src;
     i32 m_pos;
+    i32 m_row;
+    i32 m_col;
 
 public:
     Tokenizer() = default;
     explicit Tokenizer(const Str& src);
     ~Tokenizer() = default;
 
-    Vec<Token> tokenize();
+    Vec<Token> tokenize(void);
 
 private:
     Token read_ident(void);
@@ -309,6 +311,8 @@ private:
     Token read_float(void);
     Token read_str(void);
     //Token read_list(void);
+    Token next_token(void);
+    i32 next(void);
     char peek();
     void skip_whitespace(void);
     void skip_comment(void);
