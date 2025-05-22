@@ -930,8 +930,24 @@ void Env::put(Str key, const Object& val){
     this->m_bindings[key] = val;
 }
 
+// -*-
+void Env::update(Str key, const Object& val){
+    if(!this->contains(key)){
+        std::stringstream stream;
+        stream << "undefined symbol `" << key << "'";
+        throw Error(Error::Kind::RuntimeError, stream.str());
+    }
+    auto entry = this->m_bindings.find(key);
+    if(entry != this->m_bindings.end()){
+        this->m_bindings[key] = val;
+    }else{
+        if(this->m_parent != nullptr){
+            this->m_parent->update(key, val);
+        }
+    }
+}
+
 /*
-void Env::update(Str key, const Object& val){}
 Object Env::get(Str key){}
 bool Env::contains(const Str key){}
 void Env::set_parent(Env* parent){}
