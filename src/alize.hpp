@@ -62,6 +62,7 @@ using Vec = std::vector<T>;
 template<typename T>
 using Option = std::optional<T>;
 using f64 = double;
+using usize = std::size_t;
 using i64 = std::int64_t;
 using u32 = std::uint32_t;
 using i32 = std::int32_t;
@@ -278,7 +279,7 @@ enum class TokenKind{
 };
 
 
-struct Token{
+struct Token final{
     TokenKind kind;
     Str lexeme;
     i32 row;
@@ -289,12 +290,10 @@ struct Token{
 };
 
 
-class Tokenizer{
+class Tokenizer final{
 private:
     Str m_src;
-    Str::const_iterator m_beg;
-    Str::const_iterator m_end;
-    Str::iterator m_ptr;
+    i32 m_pos;
 
 public:
     Tokenizer() = default;
@@ -311,7 +310,10 @@ private:
     Token read_str(void);
     //Token read_list(void);
     char peek();
-    bool match(const Str& ident);    
+    void skip_whitespace(void);
+    void skip_comment(void);
+    bool match(const Str& ident); 
+    bool is_eof(void);   
 };
 
 // -*------------------------*-
