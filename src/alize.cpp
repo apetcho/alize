@@ -687,8 +687,17 @@ Object& Object::operator-(){
     return *this;
 }
 
+// -*-
+Object& Object::operator+(){
+    if(!this->is_number()){
+        std::stringstream stream;
+        stream << "cannot negate object of type `" << this->type().data << "'";
+        throw Error(Error::Kind::TypeError, stream.str());
+    }
+    return *this;
+}
+
 /*
-Object& Object::operator+(){}
 Object& Object::operator~(){}
 
 // -*- binary-operator: {-, +, *, /, %, and, or,} -*-
