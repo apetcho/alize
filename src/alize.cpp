@@ -603,10 +603,73 @@ Str Object::str(void) const{
     return stream.str();
 }
 
+// -*-
+Str Object::repr(void) const{
+    std::stringstream stream;
+    switch(this->m_typekind){
+    case TypeKind::Nil:
+        stream << "\"nil\"";
+        break;
+    case TypeKind::Bool:{
+            auto val = std::get<bool>(this->m_value);
+            stream << (val ? "\"true\"" : "\"false\"");
+        }
+        break;
+    case TypeKind::Int:{
+            auto num = std::get<i64>(this->m_value);
+            stream << std::quoted(std::to_string(num));
+        }
+        break;
+    case TypeKind::Float:{
+            auto num = std::get<f64>(this->m_value);
+            stream << std::quoted(std::to_string(num));
+        }
+        break;
+    case TypeKind::Sym:{
+            auto val = std::get<Symbol>(this->m_value);
+            stream << std::quoted(val.data);
+        }
+        break;
+    case TypeKind::String:{
+            auto val = std::get<Str>(this->m_value);
+            stream << std::quoted(val);
+        }
+        break;
+    case TypeKind::Fn:{
+            auto val = std::get<Symbol>(this->m_value);
+            auto name = this->m_name.value_or("");
+            auto cfun = std::get<CFun>(this->m_value);
+            stream << "Builtin function `" << name << "` @ 0x";
+            stream << std::hex << cfun;
+        }
+        break;
+    case TypeKind::Fun:
+    case TypeKind::Lambda:
+    case TypeKind::Macro:{
+            auto closure = std::get<Closure>(this->m_value);
+            auto ast = closure.ast();
+            stream << ast->repr();
+        }
+        break;
+    case TypeKind::List:{
+            auto vec = std::get<ArrayList>(this->m_value);
+            if(vec.size()==0){ stream << "\"'()\"";}
+            else{
+                stream << "'(";
+                auto len = vec.size();
+                for(decltype(len) i=0; i < len; i++){
+                    stream << vec[i].repr();
+                    if(i < (len-1)){ stream << " "; }
+                }
+                stream << ")";
+            }
+        }
+        break;
+    }
 
-/*
-Str Object::repr(void) const{}
-    
+    return stream.str();
+}
+/*    
 // -*- unary-operator: {-, +, ~, } -*-
 Object& Object::operator-(){}
 Object& Object::operator+(){}
