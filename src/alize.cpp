@@ -919,9 +919,14 @@ Env::Env()
 Env::Env(Env* parent)
 : m_bindings{}, m_parent{parent}{}
 
+// -*-
+Env::Env(const Env& other)
+: m_bindings{other.m_bindings}
+, m_parent{other.m_parent}
+{}
+
 
 /*
-Env::Env(const Env& other){}
 Env::~Env(){}
 void Env::put(Str key, const Object& val){}
 void Env::update(Str key, const Object& val){}
