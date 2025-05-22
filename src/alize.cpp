@@ -524,9 +524,87 @@ bool Object::is_list(void) const{
     return this->m_typekind == TypeKind::List;
 }
 
-/*
 // -*- stringifiers -*-
-Str Object::str(void) const{}
+Str Object::str(void) const{
+    std::stringstream stream;
+    switch(this->m_typekind){
+    case TypeKind::Nil:
+        stream << "nil";
+        break;
+    case TypeKind::Bool:{
+            auto val = std::get<bool>(this->m_value);
+            stream << (val ? "true" : "false");
+        }
+        break;
+    case TypeKind::Int:{
+            auto num = std::get<i64>(this->m_value);
+            stream << num;
+        }
+        break;
+    case TypeKind::Float:{
+            auto num = std::get<f64>(this->m_value);
+            stream << num;
+        }
+        break;
+    case TypeKind::Sym:{
+            auto val = std::get<Symbol>(this->m_value);
+            stream << val.data;
+        }
+        break;
+    case TypeKind::String:{
+            auto val = std::get<Str>(this->m_value);
+            stream << val;
+        }
+        break;
+    case TypeKind::Fn:{
+            auto val = std::get<Symbol>(this->m_value);
+            auto name = this->m_name.value_or("");
+            auto cfun = std::get<CFun>(this->m_value);
+            stream << "Builtin function `" << name << "` @ 0x";
+            stream << std::hex << cfun;
+        }
+        break;
+    case TypeKind::Fun:{
+            auto closure = std::get<Closure>(this->m_value);
+            auto ast = closure.ast();
+            stream << "Function `" << closure.name() << "` @ 0x";
+            stream << std::hex << ast.get();
+        }
+        break;
+    case TypeKind::Lambda:{
+            auto closure = std::get<Closure>(this->m_value);
+            auto ast = closure.ast();
+            stream << "Lambda  @ 0x" << std::hex << ast.get();
+        }
+        break;
+    case TypeKind::Macro:{
+            auto closure = std::get<Closure>(this->m_value);
+            auto ast = closure.ast();
+            stream << "Macro `" << closure.name() << "` @ 0x";
+            stream << std::hex << ast.get();
+        }
+        break;
+    case TypeKind::List:{
+            auto vec = std::get<ArrayList>(this->m_value);
+            if(vec.size()==0){ stream << "()";}
+            else{
+                stream << "(";
+                auto len = vec.size();
+                for(decltype(len) i=0; i < len; i++){
+                    stream << vec[i].str();
+                    if(i < (len-1)){ stream << " "; }
+                }
+                stream << ")";
+            }
+        }
+        break;
+    }
+
+    return stream.str();
+}
+
+
+/*
 Str Object::repr(void) const{}
     
 // -*- unary-operator: {-, +, ~, } -*-
