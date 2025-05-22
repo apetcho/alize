@@ -963,8 +963,21 @@ Object Env::get(Str key){
     }
 }
 
+// -*-
+bool Env::contains(const Str key){
+    auto entry = this->m_bindings.find(key);
+    if(entry != this->m_bindings.end()){
+        return true;
+    }else{
+        if(this->m_parent == nullptr){
+            return false;
+        }else{
+            return this->m_parent->contains(key);
+        }
+    }
+}
+
 /*
-bool Env::contains(const Str key){}
 void Env::set_parent(Env* parent){}
 
 */
