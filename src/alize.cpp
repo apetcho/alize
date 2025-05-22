@@ -908,11 +908,14 @@ Symbol Object::type(void) const{
     return entry->second;
 }
 
-/*
+// -*-
 // -*-------*-
 // -*- Env -*-
 // -*-------*-
-Env::Env(){}
+Env::Env()
+: m_bindings{}, m_parent{nullptr} {}
+
+/*
 Env::Env(Env* parent){}
 Env::Env(const Env& other){}
 Env::~Env(){}
@@ -920,7 +923,7 @@ void Env::put(Str key, const Object& val){}
 void Env::update(Str key, const Object& val){}
 Object Env::get(Str key){}
 bool Env::contains(const Str key){}
-bool Env::contains(const Str key){}
+void Env::set_parent(Env* parent){}
 
 */
 
