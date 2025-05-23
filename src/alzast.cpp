@@ -98,6 +98,11 @@ Object IntegerAst::eval([[maybe_unused]] Env& env){
     return Object(num);
 }
 
+// -*-
+Str IntegerAst::str(void) const{
+    return this->m_token.lexeme;
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -117,7 +122,6 @@ class IntegerAst:: final: public AstBase{
 public:
     ~IntegerAst() = default;
 
-Str IntegerAst::str(void) const{}
 Str IntegerAst::repr(void) const{}
 Str IntegerAst::literal(void) const{}
 
