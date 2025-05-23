@@ -332,13 +332,7 @@ Object LambdaAst::eval([[maybe_unused]] Env& env){
 // -*-
 Str LambdaAst::str(void) const{
     std::stringstream stream;
-    stream << "(lambda ";
-    auto params = ListAst(this->m_params);
-    stream << params.str();
-    for(const auto& ast: this->m_body){
-        stream << ast->str();
-    }
-    stream << ")";
+    stream << "lambda at 0x" << &this->m_body;
     return stream.str();
 }
 
@@ -397,6 +391,19 @@ Str FunAst::str(void) const{
     return stream.str();
 }
 
+// -*-
+Str FunAst::repr(void) const{
+    std::stringstream stream;
+    stream << "(fun " << this->m_name.lexeme;
+    auto params = ListAst(this->m_params);
+    stream << params.repr();
+    for(const auto& ast: this->m_body){
+        stream << ast->repr();
+    }
+    stream << ")";
+    return stream.str();
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -416,7 +423,7 @@ protected:
 class FunAst final: public AstBase{
 public:
     ~FunAst() = default;
-Str FunAst::repr(void) const{}
+
 
 Str FunAst::name(void) const{}
 Vec<Symbol> FunAst::params(void) const{}
