@@ -499,15 +499,14 @@ void Tokenizer::skip_comment(void){
 }
 
 // -*-
-bool Tokenizer::match(const Str& ident){
-    //! @todo
-    return false;
-}
+// bool Tokenizer::match(const Str& ident){
+//     //! @todo
+//     return false;
+// }
 
 // -*-
 bool Tokenizer::is_eof(void){
-    //! @todo
-    return false;
+    return (this->m_pos >= this->m_src.length());
 }
 
 /*

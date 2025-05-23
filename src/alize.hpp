@@ -322,7 +322,7 @@ private:
     bool is_valid_identifier_char(int c);
     void skip_whitespace(void);
     void skip_comment(void);
-    bool match(const Str& ident);
+    // bool match(const Str& ident);
     bool is_eof(void);
 };
 
