@@ -385,6 +385,11 @@ FunAst::FunAst(Token name, Vec<Token> params, Vec<Ast> body)
 , m_params{params}
 , m_body{body}{}
 
+// -*-
+Object FunAst::eval([[maybe_unused]] Env& env){
+    return Object(Closure(*this, env));
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -404,7 +409,6 @@ protected:
 class FunAst final: public AstBase{
 public:
     ~FunAst() = default;
-Object FunAst::eval([[maybe_unused]] Env& env){}
 Str FunAst::str(void) const{}
 Str FunAst::repr(void) const{}
 
