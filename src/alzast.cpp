@@ -375,6 +375,15 @@ Vec<Ast> LambdaAst::body(void) const{
     return this->m_body;
 }
 
+// -*-----------------------------*-
+// -*- User-defined function AST -*-
+// -*-----------------------------*-
+// (defun name params body)
+FunAst::FunAst(Token name, Vec<Token> params, Vec<Ast> body)
+: AstBase{AstKind::Fun}
+, m_name{name}
+, m_params{params}
+, m_body{body}{}
 
 /*
 // -*- AstBase -*-
@@ -391,20 +400,18 @@ protected:
     AstKind m_kind;
 };
 
-// -*- User-defined function AST -*-
-// (defun name params body)
+
 class FunAst final: public AstBase{
 public:
-FunAst::FunAst(Token name, Vec<Token> params, Vec<Ast> body);
     ~FunAst() = default;
-Object FunAst::eval([[maybe_unused]] Env& env) override;
-Str FunAst::str(void) const override;
-Str FunAst::repr(void) const override;
+Object FunAst::eval([[maybe_unused]] Env& env){}
+Str FunAst::str(void) const{}
+Str FunAst::repr(void) const{}
 
-Str FunAst::name(void) const;
-Vec<Symbol> FunAst::params(void) const;
-Vec<Ast> FunAst::body(void) const;
-Env FunAst::scope(void) const;
+Str FunAst::name(void) const{}
+Vec<Symbol> FunAst::params(void) const{}
+Vec<Ast> FunAst::body(void) const{}
+Env FunAst::scope(void) const{}
 
 private:
     Token m_name;
