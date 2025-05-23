@@ -439,6 +439,10 @@ MacroAst::MacroAst(Token name, Vec<Token> params, Vec<Ast> body)
 , m_params{params}
 , m_body{body}{}
 
+// -*-
+Object MacroAst::eval([[maybe_unused]] Env& env){
+    return Object(Closure(*this, env));
+}
 
 /*
 // -*- AstBase -*-
@@ -459,7 +463,6 @@ protected:
 class MacroAst:: final: public AstBase{
 public:
     ~MacroAst() = default;
-Object MacroAst::eval([[maybe_unused]] Env& env){}
 Str MacroAst::str(void) const{}
 Str MacroAst::repr(void) const{}
 
