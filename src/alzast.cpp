@@ -355,6 +355,21 @@ Str LambdaAst::repr(void) const{
     return stream.str();
 }
 
+// -*-
+Vec<Symbol> LambdaAst::params(void) const{
+    Vec<Symbol> result{};
+    for(const auto& token: this->m_params){
+        auto lexeme = token.lexeme;
+        if(!_is_identifier(lexeme)){
+            std::stringstream stream;
+            stream << "invalid parameter `" << lexeme << "' to lambda";
+            throw Error(Error::Kind::Default, stream.str());
+        }
+        result.emplace_back(lexeme);
+    }
+    return result;
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -375,7 +390,7 @@ class LambdaAst final: public AstBase{
 public:
     ~LambdaAst() = default;
 
-Vec<Symbol> LambdaAst::params(void) const{}
+
 Vec<Ast> LambdaAst::body(void) const{}
 // Env LambdaAst::scope(void) const{}
 
