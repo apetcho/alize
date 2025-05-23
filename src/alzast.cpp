@@ -485,6 +485,11 @@ Vec<Symbol> MacroAst::params(void) const{
     return result;
 }
 
+// -*-
+Vec<Ast> MacroAst::body(void) const{
+    return this->m_body;
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -506,7 +511,7 @@ public:
     ~MacroAst() = default;
 
 
-Vec<Ast> MacroAst::body(void) const{}
+
 // Env MacroAst::scope(void) const{}
 Ast MacroAst::expand(void) const{}
 

@@ -510,7 +510,7 @@ public:
     Vec<Symbol> params(void) const;
     Vec<Ast> body(void) const;
     // Env scope(void) const;
-    Ast expand(void) const;
+    Object expand(void) const; // return a closure (<function>) object
 
 private:
     Token m_name;
