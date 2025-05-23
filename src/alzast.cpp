@@ -156,6 +156,13 @@ Str FloatAst::str(void) const{
     return this->m_token.lexeme;
 }
 
+// -*-
+Str FloatAst::repr(void) const{
+    std::stringstream stream;
+    stream << "\"" << this->m_token.lexeme << "\"";
+    return stream.str();
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -176,7 +183,7 @@ class FloatAst final: public AstBase{
 public:
     ~FloatAst() = default;
 
-Str FloatAst::repr(void) const{}
+
 Token FloatAst::literal(){}
 
 private:
