@@ -7,6 +7,271 @@
 namespace alz{
 // -*-
 
+/*
+// -*- AstBase -*-
+class AstBase{
+public:
+    AstBase(AstKind kind): m_kind{kind}{}
+    virtual ~AstBase() = default;
+    AstKind kind() const { return this->m_kind; }
+    virtual Object eval([[maybe_unused]] Env& env) = 0;
+    virtual Str str(void) const = 0;
+    virtual Str repr(void) const = 0;
+
+protected:
+    AstKind m_kind;
+};
+
+// -*------------------*-
+// -*- Identifier AST -*-
+// [_\-a-zA-Z0-9\:#~&]
+class IdentAst:: final: public AstBase{
+public:
+IdentAst::IdentAst(Token token){}
+    ~IdentAst() = default;
+Object IdentAst::eval([[maybe_unused]] Env& env) override;
+Str IdentAst::str(void) const override;
+Str IdentAst::repr(void) const override;
+Str IdentAst::literal(void) const;
+
+private:
+    Token m_literal; // nil, true, false, *reserved-word*, *var-or-func-name*
+};
+
+// -*- Integer AST -*-
+// [-+](0b[01]+)|(0o[0-7]+)|(0x[0-9]+)
+class IntegerAst:: final: public AstBase{
+public:
+IntegerAst::IntegerAst(Token token);
+    ~IntegerAst() = default;
+Object IntegerAst::eval([[maybe_unused]] Env& env) override;
+Str IntegerAst::str(void) const override;
+Str IntegerAst::repr(void) const override;
+Str IntegerAst::literal(void) const;
+
+private:
+    Str m_literal;
+};
+
+// -*- Float AST -*-
+// [+-][0-9]+\.[0-9]+[eE][+-][0-9]+ | "numstr"
+class FloatAst final: public AstBase{
+public:
+FloatAst::FloatAst(Token token);
+    ~FloatAst() = default;
+Object FloatAst::eval([[maybe_unused]] Env& env) override;
+Str FloatAst::str(void) const override;
+Str FloatAst::repr(void) const override;
+Token FloatAst::literal();
+
+private:
+    Token m_token;
+};
+
+// -*- String AST -*-
+// "..."
+class StringAst final: public AstBase{
+public:
+StringAst::StringAst(Token token);
+    ~StringAst() = default;
+Object StringAst::eval([[maybe_unused]] Env& env) override;
+Str StringAst::str(void) const override;
+Str StringAst::repr(void) const override;
+Str StringAst::literal(void) const;
+
+private:
+    Token m_token;
+};
+
+// -*- List AST -*-
+// (list ...)
+class ListAst:: final: public AstBase{
+public:
+ListAst::ListAst(Vec<Token> tokens);
+    ~ListAst() = default;
+Object ListAst::eval([[maybe_unused]] Env& env) override;
+Str ListAst::str(void) const override;
+Str ListAst::repr(void) const override;
+
+private:
+    Vec<Token> m_vec;
+};
+
+// -*- Lambda AST -*-
+// (lambda params body)
+class LambdaAst final: public AstBase{
+public:
+LambdaAst::LambdaAst(Vec<Token> params, Vec<Ast> asts);
+    ~LambdaAst() = default;
+Object LambdaAst::eval([[maybe_unused]] Env& env) override;
+Str LambdaAst::str(void) const override;
+Str LambdaAst::repr(void) const override;
+
+Vec<Symbol> LambdaAst::params(void) const;
+Vec<Ast> LambdaAst::body(void) const;
+Env LambdaAst::scope(void) const;
+
+private:
+    Vec<Token> m_params;
+    Vec<Ast> m_body;
+    Env m_scope;
+};
+
+// -*- User-defined function AST -*-
+// (defun name params body)
+class FunAst final: public AstBase{
+public:
+FunAst::FunAst(Token name, Vec<Token> params, Vec<Ast> body);
+    ~FunAst() = default;
+Object FunAst::eval([[maybe_unused]] Env& env) override;
+Str FunAst::str(void) const override;
+Str FunAst::repr(void) const override;
+
+Str FunAst::name(void) const;
+Vec<Symbol> FunAst::params(void) const;
+Vec<Ast> FunAst::body(void) const;
+Env FunAst::scope(void) const;
+
+private:
+    Token m_name;
+    Vec<Token> m_params;
+    Vec<Ast> m_body;
+    Env m_scope;
+};
+
+// -*- Macro AST -*-
+// (defmacro name params body)
+class MacroAst:: final: public AstBase{
+public:
+MacroAst::MacroAst(Token name, Vec<Token> params, Vec<Ast> body);
+    ~MacroAst() = default;
+Object MacroAst::eval([[maybe_unused]] Env& env) override;
+Str MacroAst::str(void) const override;
+Str MacroAst::repr(void) const override;
+
+Str MacroAst::name(void) const;
+Vec<Symbol> MacroAst::params(void) const;
+Vec<Ast> MacroAst::body(void) const;
+Env MacroAst::scope(void) const;
+Ast MacroAst::expand(void) const;
+
+private:
+    Token m_name;
+    Vec<Token> m_params;
+    Vec<Ast> m_body;
+    Env m_scope;
+};
+
+// -*- If AST -*-
+// (if test ok alt)
+class IfAst final: public AstBase{
+public:
+IfAst::IfAst(Ast test, Ast okay, Ast alt);
+    ~IfAst() = default;
+Object IfAst::eval([[maybe_unused]] Env& env) override;
+Str IfAst::str(void) const override;
+Str IfAst::repr(void) const override;
+
+private:
+    Ast m_test;
+    Ast m_okay;
+    Ast m_alt;
+};
+
+// -*- Define AST -*-
+// (define name sexpr)
+class VarAst final: public AstBase{
+public:
+VarAst::VarAst(Token name, Ast ast);
+    ~VarAst() = default;
+Object VarAst::eval([[maybe_unused]] Env& env) override;
+Str VarAst::str(void) const override;
+Str VarAst::repr(void) const override;
+
+private:
+    Token m_name;
+    Ast m_ast;
+};
+
+// -*- Progn AST -*-
+// (progn ...)
+class PrognAst final: public AstBase{
+public:
+PrognAst::PrognAst(Vec<Ast> body);
+    ~PrognAst() = default;
+Object PrognAst::eval([[maybe_unused]] Env& env) override;
+Str PrognAst::str(void) const override;
+Str PrognAst::repr(void) const override;
+
+private:
+    Vec<Ast> m_body;
+};
+
+// -*- For AST -*-
+// (for (x xs) body)
+class ForAst final: public AstBase{
+public:
+ForAst::ForAst(Vec<Ast> args, Vec<Ast> body);
+    ~ForAst() = default;
+Object ForAst::eval([[maybe_unused]] Env& env) override;
+Str ForAst::str(void) const override;
+Str ForAst::repr(void) const override;
+
+private:
+    Vec<Ast> m_args; // (x xs)
+    Vec<Ast> m_body; // body
+};
+
+// -*- Cond AST -*-
+// (cond (tst1 ast1) (tst2 ast2) ...  )
+class CondAst final: public AstBase{
+public:
+CondAst::CondAst(Vec<Ast> clauses);
+    ~CondAst() = default;
+Object CondAst::eval([[maybe_unused]] Env& env) override;
+Str CondAst::str(void) const override;
+Str CondAst::repr(void) const override;
+
+private:
+    Vec<Ast> m_clauses;
+};
+
+// -*--------------*-
+// -*- Import AST -*-
+// -*--------------*-
+// (import modulename)
+class ImportAst final: public AstBase{
+public:
+
+ImportAst::ImportAst(Symbol sym);
+~ImportAst() = default;
+Object ImportAst::eval([[maybe_unused]] Env& env) override;
+Str ImportAst::str(void) const override;
+Str ImportAst::repr(void) const override;
+
+private:
+    Symbol m_sym;
+    fs::path m_path;
+};
+
+// -*-----------*-
+// -*- Let AST -*-
+// -*-----------*-
+// (let ((x xval) (y yval) ...) body)
+class LetAst:: final: public AstBase{
+public:
+
+LetAst::LetAst(Vec<ListAst> defs, Vec<Ast> body);
+    ~LetAst() = default;
+Object LetAst::eval([[maybe_unused]] Env& env) override;
+Str LetAst::str(void) const override;
+Str LetAst::repr(void) const override;
+
+private:
+    Vec<ListAst> m_defs;
+    Vec<Ast> m_body;
+};
+*/
 
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::alz                                          -*-

@@ -483,6 +483,25 @@ char Tokenizer::peek(){
 }
 
 // -*-
+bool Tokenizer::is_valid_identifier_start_char(int c){
+    static const Str _startChars{
+        "abcdefghijklmnopqrstuvwxyz"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "_#$&!"
+    };
+    return _startChars.find(c) != Str::npos;
+}
+
+// -*-
+bool Tokenizer::is_valid_identifier_char(int c){
+    static const Str _otherChars{"0123456789@~?"};
+    return (
+        this->is_valid_identifier_start_char(c) ||
+        _otherChars.find(c) != Str::npos
+    );
+}
+
+// -*-
 void Tokenizer::skip_whitespace(void){
     if(this->m_cur == EOF){ return; }
     if(std::isspace(this->m_cur)){
