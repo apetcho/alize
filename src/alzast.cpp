@@ -71,6 +71,33 @@ IntegerAst::IntegerAst(Token token)
 : AstBase{AstKind::Integer}
 , m_token{token} {}
 
+// -*-
+Object IntegerAst::eval([[maybe_unused]] Env& env){
+    auto lexeme = this->m_token.lexeme;
+    i64 num{};
+    try{
+        num = static_cast<i64>(std::stoll(lexeme));
+    }catch(std::invalid_argument& err){
+        std::stringstream stream;
+        stream << err.what() << "\n";
+        stream << "at Line " << this->m_token.row;
+        stream << " and column " << this->m_token.col;
+        throw Error(Error::Kind::ValueError, stream.str());
+    }catch(std::out_of_range& err){
+        std::stringstream stream;
+        stream << err.what() << "\n";
+        stream << "at Line " << this->m_token.row;
+        stream << " and column " << this->m_token.col;
+        throw Error(Error::Kind::ValueError, stream.str());
+    }catch(...){
+        std::stringstream stream;
+        stream << "unexpected error occured";
+        throw Error(Error::Kind::Default, stream.str());
+    }
+
+    return Object(num);
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -89,10 +116,10 @@ protected:
 class IntegerAst:: final: public AstBase{
 public:
     ~IntegerAst() = default;
-Object IntegerAst::eval([[maybe_unused]] Env& env) override;
-Str IntegerAst::str(void) const override;
-Str IntegerAst::repr(void) const override;
-Str IntegerAst::literal(void) const;
+
+Str IntegerAst::str(void) const{}
+Str IntegerAst::repr(void) const{}
+Str IntegerAst::literal(void) const{}
 
 private:
     Str m_literal;
