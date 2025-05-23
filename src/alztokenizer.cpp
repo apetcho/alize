@@ -492,7 +492,10 @@ void Tokenizer::skip_whitespace(void){
 
 // -*-
 void Tokenizer::skip_comment(void){
-    //! @todo
+    if(this->m_cur == EOF){ return; }
+    if(this->peek() == ';'){
+        while(_to_char(this->next()) != '\n' && !this->is_eof()){}
+    }
 }
 
 // -*-
