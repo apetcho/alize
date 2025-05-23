@@ -404,6 +404,11 @@ Str FunAst::repr(void) const{
     return stream.str();
 }
 
+// -*-
+Str FunAst::name(void) const{
+    return this->m_name.lexeme;
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -425,7 +430,6 @@ public:
     ~FunAst() = default;
 
 
-Str FunAst::name(void) const{}
 Vec<Symbol> FunAst::params(void) const{}
 Vec<Ast> FunAst::body(void) const{}
 Env FunAst::scope(void) const{}
