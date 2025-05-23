@@ -509,30 +509,6 @@ bool Tokenizer::is_eof(void){
     return (this->m_pos >= this->m_src.length());
 }
 
-/*
-class Tokenizer{
-private:
-    Str m_src;
-    Str::const_iterator m_beg;
-    Str::const_iterator m_end;
-    Str::iterator m_ptr;
-
-public:
-    Tokenizer() = default;
-    ~Tokenizer() = default;
-
-private:
-// Token Tokenizer::read_bool(void){}
-// Token Tokenizer::read_integer(void){}
-// Token Tokenizer::read_float(void){}
-
-    //Token read_list(void);
-
-};
-
-*/
-
-
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::alz                                          -*-
 // -*----------------------------------------------------------------*-
