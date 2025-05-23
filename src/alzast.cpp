@@ -274,6 +274,24 @@ Object ListAst::eval([[maybe_unused]] Env& env){
     return Object(vec);
 }
 
+// -*-
+Str ListAst::str(void) const{
+    if(this->m_vec.size()==0){
+        return "'()";
+    }
+    std::stringstream stream;
+    stream << "(";
+    auto len = this->m_vec.size();
+    for(auto idx=0; idx < len; idx++){
+        stream << this->m_vec[idx].lexeme;
+        if(idx < (len-1)){
+            stream << " ";
+        }
+    }
+    stream << ")";
+    return stream.str();
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -294,7 +312,6 @@ class ListAst:: final: public AstBase{
 public:
     ~ListAst() = default;
 
-Str ListAst::str(void) const{}
 Str ListAst::repr(void) const{}
 
 private:
