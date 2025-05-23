@@ -329,6 +329,19 @@ Object LambdaAst::eval([[maybe_unused]] Env& env){
     return Object(Closure(*this, env));
 }
 
+// -*-
+Str LambdaAst::str(void) const{
+    std::stringstream stream;
+    stream << "(lambda ";
+    auto params = ListAst(this->m_params);
+    stream << params.str();
+    for(const auto& ast: this->m_body){
+        stream << ast->str();
+    }
+    stream << ")";
+    return stream.str();
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -348,7 +361,6 @@ protected:
 class LambdaAst final: public AstBase{
 public:
     ~LambdaAst() = default;
-Str LambdaAst::str(void) const{}
 Str LambdaAst::repr(void) const{}
 
 Vec<Symbol> LambdaAst::params(void) const{}
