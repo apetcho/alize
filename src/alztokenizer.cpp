@@ -471,13 +471,15 @@ i32 Tokenizer::next(void){
 
 // -*-
 void Tokenizer::advance(void){
-    //! @todo
+    if(!this->is_eof()){
+        ++this->m_pos;
+    }
 }
 
 // -*-
 char Tokenizer::peek(){
-    //! @todo
-    return 0;
+    if(this->m_cur==EOF){ return EOF; }
+    return _to_char(this->m_cur);
 }
 
 // -*-
