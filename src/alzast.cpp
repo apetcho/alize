@@ -1,5 +1,5 @@
 #include "alize.hpp"
-
+#include<set>
 
 // -*----------------------------------------------------------------*-
 // -*- begin::namespace::alz                                        -*-
@@ -13,6 +13,24 @@ namespace alz{
 IdentAst::IdentAst(Token token)
 : AstBase{AstKind::Ident}
 , m_token{token}{}
+
+// -*-
+Object IdentAst::eval([[maybe_unused]] Env& env){
+    static const std::set<Str> _reservedWords = {
+        "import", "let", "var", "cond", "for", "progn",
+        "if", "macro", "fun", "lambda"
+    };
+    auto lexeme = this->m_token.lexeme;
+    if(lexeme == "true"){ return Object(true); }
+    if(lexeme == "false"){ return Object(false); }
+    if(lexeme == "nil"){ return Object(); }
+    auto iter = _reservedWords.find(lexeme);
+    if(iter != _reservedWords.end()){ // it is a reserved word
+        return Object(Symbol(lexeme));
+    }
+    // it is a user-defined identifier or builtin function or constant identifier
+    return Object(Symbol(this->m_token.lexeme));
+}
 
 /*
 // -*- AstBase -*-
@@ -33,7 +51,7 @@ protected:
 class IdentAst:: final: public AstBase{
 public:
     ~IdentAst() = default;
-Object IdentAst::eval([[maybe_unused]] Env& env) override;
+
 Str IdentAst::str(void) const override;
 Str IdentAst::repr(void) const override;
 Str IdentAst::literal(void) const;
