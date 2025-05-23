@@ -324,6 +324,11 @@ LambdaAst::LambdaAst(Vec<Token> params, Vec<Ast> asts)
 , m_params{params}
 , m_body{asts}{}
 
+// -*-
+Object LambdaAst::eval([[maybe_unused]] Env& env){
+    return Object(Closure(*this, env));
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -342,9 +347,7 @@ protected:
 
 class LambdaAst final: public AstBase{
 public:
-
     ~LambdaAst() = default;
-Object LambdaAst::eval([[maybe_unused]] Env& env){}
 Str LambdaAst::str(void) const{}
 Str LambdaAst::repr(void) const{}
 
