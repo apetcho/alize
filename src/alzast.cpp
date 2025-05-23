@@ -292,6 +292,29 @@ Str ListAst::str(void) const{
     return stream.str();
 }
 
+// -*-
+Str ListAst::repr(void) const{
+    if(this->m_vec.size()==0){
+        return "'()";
+    }
+    std::stringstream stream;
+    stream << "(";
+    auto len = this->m_vec.size();
+    for(auto idx=0; idx < len; idx++){
+        auto lexeme = this->m_vec[idx].lexeme;
+        if(this->m_vec[idx].kind == TokenKind::String){
+            stream << "\"" << lexeme << "\"";
+        }else{
+            stream << lexeme;
+        }
+        if(idx < (len-1)){
+            stream << " ";
+        }
+    }
+    stream << ")";
+    return stream.str();
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -307,16 +330,6 @@ protected:
     AstKind m_kind;
 };
 
-
-class ListAst:: final: public AstBase{
-public:
-    ~ListAst() = default;
-
-Str ListAst::repr(void) const{}
-
-private:
-    Vec<Token> m_vec;
-};
 
 // -*- Lambda AST -*-
 // (lambda params body)
