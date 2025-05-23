@@ -63,6 +63,14 @@ Str IdentAst::literal(void) const{
     return this->m_token.lexeme;
 }
 
+// -*---------------*-
+// -*- Integer AST -*-
+// -*---------------*-
+// [-+](0b[01]+)|(0o[0-7]+)|(0x[0-9]+) | "numstr"
+IntegerAst::IntegerAst(Token token)
+: AstBase{AstKind::Integer}
+, m_token{token} {}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -78,12 +86,8 @@ protected:
     AstKind m_kind;
 };
 
-
-// -*- Integer AST -*-
-// [-+](0b[01]+)|(0o[0-7]+)|(0x[0-9]+)
 class IntegerAst:: final: public AstBase{
 public:
-IntegerAst::IntegerAst(Token token);
     ~IntegerAst() = default;
 Object IntegerAst::eval([[maybe_unused]] Env& env) override;
 Str IntegerAst::str(void) const override;

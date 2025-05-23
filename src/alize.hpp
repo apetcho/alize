@@ -405,7 +405,7 @@ public:
     Str literal(void) const;
 
 private:
-    Str m_literal;
+    Token m_token;
 };
 
 // -*- Float AST -*-
