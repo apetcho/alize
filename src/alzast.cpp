@@ -386,7 +386,7 @@ Object FunAst::eval([[maybe_unused]] Env& env){
 
 Str FunAst::str(void) const{
     std::stringstream stream;
-    stream << "Function `" << this->m_name.lexeme << "' at ";
+    stream << "Function `" << this->m_name.lexeme << "' at 0x";
     stream << std::hex << &this->m_body;
     return stream.str();
 }
@@ -444,6 +444,15 @@ Object MacroAst::eval([[maybe_unused]] Env& env){
     return Object(Closure(*this, env));
 }
 
+// -*-
+Str MacroAst::str(void) const{
+    std::stringstream stream;
+    stream << "macro `" << this->m_name.lexeme << "' at 0x";
+    stream << std::hex << &this->m_body;
+    return stream.str();
+}
+
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -463,7 +472,7 @@ protected:
 class MacroAst:: final: public AstBase{
 public:
     ~MacroAst() = default;
-Str MacroAst::str(void) const{}
+
 Str MacroAst::repr(void) const{}
 
 Str MacroAst::name(void) const{}
