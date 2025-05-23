@@ -151,6 +151,11 @@ Object FloatAst::eval([[maybe_unused]] Env& env){
     return Object(num);
 }
 
+// -*-
+Str FloatAst::str(void) const{
+    return this->m_token.lexeme;
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -170,7 +175,7 @@ protected:
 class FloatAst final: public AstBase{
 public:
     ~FloatAst() = default;
-Str FloatAst::str(void) const{}
+
 Str FloatAst::repr(void) const{}
 Token FloatAst::literal(){}
 
