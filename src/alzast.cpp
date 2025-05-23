@@ -195,6 +195,14 @@ Str StringAst::literal(void) const{
     return this->m_token.lexeme;
 }
 
+// -*------------*-
+// -*- List AST -*-
+// -*------------*-
+// (list ...)
+ListAst::ListAst(Vec<Token> tokens)
+: AstBase{AstKind::List}
+, m_vec{tokens}{}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -211,22 +219,8 @@ protected:
 };
 
 
-// "..."
-class StringAst final: public AstBase{
-public:
-    ~StringAst() = default;
-
-
-
-private:
-    Token m_token;
-};
-
-// -*- List AST -*-
-// (list ...)
 class ListAst:: final: public AstBase{
 public:
-ListAst::ListAst(Vec<Token> tokens);
     ~ListAst() = default;
 Object ListAst::eval([[maybe_unused]] Env& env) override;
 Str ListAst::str(void) const override;
