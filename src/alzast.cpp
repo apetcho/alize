@@ -424,6 +424,10 @@ Vec<Symbol> FunAst::params(void) const{
     return result;
 }
 
+// -*-
+Vec<Ast> FunAst::body(void) const{
+    return this->m_body;
+}
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -446,7 +450,7 @@ public:
 
 
 
-Vec<Ast> FunAst::body(void) const{}
+
 Env FunAst::scope(void) const{}
 
 private:
