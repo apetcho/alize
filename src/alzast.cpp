@@ -190,6 +190,11 @@ Str StringAst::repr(void) const{
     return this->m_token.lexeme;
 }
 
+// -*-
+Str StringAst::literal(void) const{
+    return this->m_token.lexeme;
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -211,7 +216,7 @@ class StringAst final: public AstBase{
 public:
     ~StringAst() = default;
 
-Str StringAst::literal(void) const{}
+
 
 private:
     Token m_token;
