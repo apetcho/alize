@@ -390,7 +390,7 @@ public:
     Str literal(void) const;
 
 private:
-    Token m_literal; // nil, true, false, *reserved-word*, *var-or-func-name*
+    Token m_token; // nil, true, false, *reserved-word*, *var-or-func-name*
 };
 
 // -*- Integer AST -*-

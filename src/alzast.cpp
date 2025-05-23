@@ -6,6 +6,13 @@
 // -*----------------------------------------------------------------*-
 namespace alz{
 // -*-
+// -*------------------*-
+// -*- Identifier AST -*-
+// -*------------------*-
+// [_\-a-zA-Z0-9\:#~&]
+IdentAst::IdentAst(Token token)
+: AstBase{AstKind::Ident}
+, m_token{token}{}
 
 /*
 // -*- AstBase -*-
@@ -22,12 +29,9 @@ protected:
     AstKind m_kind;
 };
 
-// -*------------------*-
-// -*- Identifier AST -*-
-// [_\-a-zA-Z0-9\:#~&]
+
 class IdentAst:: final: public AstBase{
 public:
-IdentAst::IdentAst(Token token){}
     ~IdentAst() = default;
 Object IdentAst::eval([[maybe_unused]] Env& env) override;
 Str IdentAst::str(void) const override;
@@ -35,7 +39,7 @@ Str IdentAst::repr(void) const override;
 Str IdentAst::literal(void) const;
 
 private:
-    Token m_literal; // nil, true, false, *reserved-word*, *var-or-func-name*
+    Token m_token; // nil, true, false, *reserved-word*, *var-or-func-name*
 };
 
 // -*- Integer AST -*-
