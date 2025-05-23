@@ -199,7 +199,7 @@ Token Tokenizer::next_token(void){
             token.lexeme = self.lexeme;
             token.row = self.row;
             token.col = self.col;
-        }else if(this->is_valid_identifier_start_char(c)){
+        }else if(this->is_valid_identifier_char(c)){
             auto self = this->read_identifier();
             token.kind = self.kind;
             token.lexeme = self.lexeme;
@@ -235,7 +235,7 @@ Token Tokenizer::read_identifier(void){
     };
     Str lexeme{};
     auto c = static_cast<char>(this->m_cur);
-    if(!this->is_valid_identifier_start_char(c)){
+    if(!this->is_valid_identifier_char(c)){
         std::stringstream stream;
         stream << "invalid first identifier character '" << c << "'";
         throw Error(Error::Kind::Default, stream.str());
@@ -483,23 +483,15 @@ char Tokenizer::peek(){
 }
 
 // -*-
-bool Tokenizer::is_valid_identifier_start_char(int c){
+bool Tokenizer::is_valid_identifier_char(int c){
     static const Str _startChars{
         "abcdefghijklmnopqrstuvwxyz"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "_#$&!"
+        "_#$&:.!+-*/%<>=~@?0123456789"
     };
     return _startChars.find(c) != Str::npos;
 }
 
-// -*-
-bool Tokenizer::is_valid_identifier_char(int c){
-    static const Str _otherChars{"0123456789@~?"};
-    return (
-        this->is_valid_identifier_start_char(c) ||
-        _otherChars.find(c) != Str::npos
-    );
-}
 
 // -*-
 void Tokenizer::skip_whitespace(void){

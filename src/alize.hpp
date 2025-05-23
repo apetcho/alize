@@ -318,12 +318,13 @@ private:
     i32 next(void);
     void advance(void);
     char peek();
-    bool is_valid_identifier_start_char(int c);
-    bool is_valid_identifier_char(int c);
     void skip_whitespace(void);
     void skip_comment(void);
     // bool match(const Str& ident);
     bool is_eof(void);
+public:
+    // static bool is_valid_identifier_start_char(int c);
+    static bool is_valid_identifier_char(int c);
 };
 
 // -*------------------------*-

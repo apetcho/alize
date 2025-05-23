@@ -12,8 +12,13 @@ static const std::set<Str> _RESERVED_WORDS = {
     "progn", "if", "macro", "fun", "lambda"
 };
 
-static const std::set<Str> _RESERVED_CONSTANTS{
+static const std::set<Str> _RESERVED_CONSTANTS = {
     "true", "false", "nil",
+};
+
+// -*-
+static const std::set<Str> _OPERATORS = {
+    "+", "-", "*", "/", "%", "<", "<=", ">", ">=", "=="
 };
 
 static inline bool _is_reserved_word(const Str& word){
@@ -22,6 +27,19 @@ static inline bool _is_reserved_word(const Str& word){
 
 static inline bool _is_reserved_constant(const Str& word){
     return _RESERVED_CONSTANTS.find(word) != _RESERVED_CONSTANTS.end();
+}
+
+static inline bool _is_identifier(const Str& word){
+    if(word.length()==0){ return false; }
+    if(_OPERATORS.find(word) == _OPERATORS.end()){
+        return false;
+    }
+    for(auto idx = 0; idx < word.size(); idx++){
+        if(!Tokenizer::is_valid_identifier_char(word[idx])){
+            return false;
+        }
+    }
+    return true;
 }
 
 // -*------------------*-
@@ -203,6 +221,59 @@ ListAst::ListAst(Vec<Token> tokens)
 : AstBase{AstKind::List}
 , m_vec{tokens}{}
 
+// -*-
+Object ListAst::eval([[maybe_unused]] Env& env){ 
+    Vec<Object> vec{};
+    for(auto idx = 0; idx < this->m_vec.size(); idx++){
+        Token token = this->m_vec[idx];
+        Object self{};
+        switch(token.kind){
+        case TokenKind::Nil:
+            self = Object();
+            break;
+        case TokenKind::False:
+            self = Object(false);
+            break;
+        case TokenKind::True:
+            self = Object(true);
+            break;
+        case TokenKind::Ident:
+            self = Object(Symbol(token.lexeme));
+            break;
+        case TokenKind::Integer:
+            self = IntegerAst(token).eval(env);
+            break;
+        case TokenKind::Float:
+            self = FloatAst(token).eval(env);
+            break;
+        case TokenKind::String:
+            self = StringAst(token).eval(env);
+            break;
+        case TokenKind::LParen:{
+                Vec<Token> items{};
+                ++idx;
+                while(this->m_vec[idx].kind != TokenKind::RParen){
+                    items.push_back(this->m_vec[idx]);
+                }
+                self = ListAst(items).eval(env);
+            }
+            break;
+        default:{
+                std::stringstream stream;
+                auto row = this->m_vec[0].row;
+                auto col = this->m_vec[0].col;
+                stream << "malformed list at line " << row;
+                stream << " and column " << col;
+                throw Error(Error::Kind::Default, stream.str());
+            }
+            break;
+        }
+        vec.push_back(self);
+    }
+
+    return Object(vec);
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -222,9 +293,9 @@ protected:
 class ListAst:: final: public AstBase{
 public:
     ~ListAst() = default;
-Object ListAst::eval([[maybe_unused]] Env& env) override;
-Str ListAst::str(void) const override;
-Str ListAst::repr(void) const override;
+
+Str ListAst::str(void) const{}
+Str ListAst::repr(void) const{}
 
 private:
     Vec<Token> m_vec;
