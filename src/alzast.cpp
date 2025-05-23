@@ -370,6 +370,12 @@ Vec<Symbol> LambdaAst::params(void) const{
     return result;
 }
 
+// -*-
+Vec<Ast> LambdaAst::body(void) const{
+    return this->m_body;
+}
+
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -383,21 +389,6 @@ public:
 
 protected:
     AstKind m_kind;
-};
-
-
-class LambdaAst final: public AstBase{
-public:
-    ~LambdaAst() = default;
-
-
-Vec<Ast> LambdaAst::body(void) const{}
-// Env LambdaAst::scope(void) const{}
-
-private:
-    Vec<Token> m_params;
-    Vec<Ast> m_body;
-    // Env m_scope;
 };
 
 // -*- User-defined function AST -*-
