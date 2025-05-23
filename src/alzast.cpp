@@ -452,6 +452,18 @@ Str MacroAst::str(void) const{
     return stream.str();
 }
 
+// -*-
+Str MacroAst::repr(void) const{
+    std::stringstream stream;
+    stream << "(macro " << this->m_name.lexeme;
+    auto params = ListAst(this->m_params);
+    stream << params.repr();
+    for(const auto& ast: this->m_body){
+        stream << ast->repr();
+    }
+    stream << ")";
+    return stream.str();    
+}
 
 /*
 // -*- AstBase -*-
@@ -473,7 +485,7 @@ class MacroAst:: final: public AstBase{
 public:
     ~MacroAst() = default;
 
-Str MacroAst::repr(void) const{}
+
 
 Str MacroAst::name(void) const{}
 Vec<Symbol> MacroAst::params(void) const{}
