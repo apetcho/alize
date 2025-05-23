@@ -111,6 +111,11 @@ Str IntegerAst::repr(void) const{
     return stream.str();
 }
 
+// -*-
+Str IntegerAst::literal(void) const{
+    return this->m_token.lexeme;
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -129,9 +134,6 @@ protected:
 class IntegerAst:: final: public AstBase{
 public:
     ~IntegerAst() = default;
-
-
-Str IntegerAst::literal(void) const{}
 
 private:
     Str m_literal;
