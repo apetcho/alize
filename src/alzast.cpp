@@ -175,6 +175,10 @@ StringAst::StringAst(Token token)
 : AstBase{AstKind::String}
 , m_token{token}{}
 
+// -*-
+Object StringAst::eval([[maybe_unused]] Env& env){
+    return Object(this->m_token.lexeme);
+}
 
 /*
 // -*- AstBase -*-
@@ -196,7 +200,6 @@ protected:
 class StringAst final: public AstBase{
 public:
     ~StringAst() = default;
-Object StringAst::eval([[maybe_unused]] Env& env){}
 Str StringAst::str(void) const{}
 Str StringAst::repr(void) const{}
 Str StringAst::literal(void) const{}
