@@ -484,7 +484,10 @@ char Tokenizer::peek(){
 
 // -*-
 void Tokenizer::skip_whitespace(void){
-    //! @todo
+    if(this->m_cur == EOF){ return; }
+    if(std::isspace(this->m_cur)){
+        while(std::isspace(this->next() && !this->is_eof())){}
+    }
 }
 
 // -*-
