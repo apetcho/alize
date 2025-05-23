@@ -428,6 +428,18 @@ Vec<Symbol> FunAst::params(void) const{
 Vec<Ast> FunAst::body(void) const{
     return this->m_body;
 }
+
+// -*-------------*-
+// -*- Macro AST -*-
+// -*-------------*-
+// (defmacro name params body)
+MacroAst::MacroAst(Token name, Vec<Token> params, Vec<Ast> body)
+: AstBase{AstKind::Macro}
+, m_name{name}
+, m_params{params}
+, m_body{body}{}
+
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -444,43 +456,24 @@ protected:
 };
 
 
-class FunAst final: public AstBase{
-public:
-    ~FunAst() = default;
-
-
-
-
-Env FunAst::scope(void) const{}
-
-private:
-    Token m_name;
-    Vec<Token> m_params;
-    Vec<Ast> m_body;
-    Env m_scope;
-};
-
-// -*- Macro AST -*-
-// (defmacro name params body)
 class MacroAst:: final: public AstBase{
 public:
-MacroAst::MacroAst(Token name, Vec<Token> params, Vec<Ast> body);
     ~MacroAst() = default;
-Object MacroAst::eval([[maybe_unused]] Env& env) override;
-Str MacroAst::str(void) const override;
-Str MacroAst::repr(void) const override;
+Object MacroAst::eval([[maybe_unused]] Env& env){}
+Str MacroAst::str(void) const{}
+Str MacroAst::repr(void) const{}
 
-Str MacroAst::name(void) const;
-Vec<Symbol> MacroAst::params(void) const;
-Vec<Ast> MacroAst::body(void) const;
-Env MacroAst::scope(void) const;
-Ast MacroAst::expand(void) const;
+Str MacroAst::name(void) const{}
+Vec<Symbol> MacroAst::params(void) const{}
+Vec<Ast> MacroAst::body(void) const{}
+// Env MacroAst::scope(void) const{}
+Ast MacroAst::expand(void) const{}
 
 private:
     Token m_name;
     Vec<Token> m_params;
     Vec<Ast> m_body;
-    Env m_scope;
+    // Env m_scope;
 };
 
 // -*- If AST -*-

@@ -466,7 +466,7 @@ public:
 
     Vec<Symbol> params(void) const;
     Vec<Ast> body(void) const;
-    Env scope(void) const;
+    // Env scope(void) const;
 
 private:
     Vec<Token> m_params;
@@ -487,7 +487,7 @@ public:
     Str name(void) const;
     Vec<Symbol> params(void) const;
     Vec<Ast> body(void) const;
-    Env scope(void) const;
+    // Env scope(void) const;
 
 private:
     Token m_name;
@@ -509,7 +509,7 @@ public:
     Str name(void) const;
     Vec<Symbol> params(void) const;
     Vec<Ast> body(void) const;
-    Env scope(void) const;
+    // Env scope(void) const;
     Ast expand(void) const;
 
 private:
