@@ -342,6 +342,19 @@ Str LambdaAst::str(void) const{
     return stream.str();
 }
 
+// -*-
+Str LambdaAst::repr(void) const{
+    std::stringstream stream;
+    stream << "(lambda ";
+    auto params = ListAst(this->m_params);
+    stream << params.repr();
+    for(const auto& ast: this->m_body){
+        stream << ast->repr();
+    }
+    stream << ")";
+    return stream.str();
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -361,7 +374,6 @@ protected:
 class LambdaAst final: public AstBase{
 public:
     ~LambdaAst() = default;
-Str LambdaAst::repr(void) const{}
 
 Vec<Symbol> LambdaAst::params(void) const{}
 Vec<Ast> LambdaAst::body(void) const{}
