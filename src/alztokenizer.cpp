@@ -275,12 +275,14 @@ Token Tokenizer::read_identifier(void){
 }
 
 // -*-
+static inline char _to_char(i32 n){
+    return static_cast<char>(n);
+}
+
+// -*-
 Token Tokenizer::read_number(void){
     bool isFloating = false;
-    auto toChar = [](i32 n){
-        return static_cast<char>(n);
-    };
-    auto c = toChar(this->m_cur);
+    auto c = _to_char(this->m_cur);
     auto row = this->m_row;
     auto col = this->m_col;
     Token token{};
@@ -292,7 +294,7 @@ Token Tokenizer::read_number(void){
     // (01) mantissa
     while(std::isdigit(c) && !this->is_eof()){
         lexeme += c;
-        c = toChar(this->next());
+        c = _to_char(this->next());
     }
     if(this->is_eof()){
         // Token is an integer
@@ -304,13 +306,13 @@ Token Tokenizer::read_number(void){
     if(c == 'b'){ // binary format
         lexeme += 'b';
         this->advance();
-        c = toChar(this->next());
+        c = _to_char(this->next());
         if(!(c=='0' || c=='1')){
             throw Error(Error::Kind::SyntaxError, "malfomed integer in binary format");
         }
         while((Str{"01"}.find(c) != Str::npos) && !this->is_eof()){
             lexeme += c;
-            c = toChar(this->next());
+            c = _to_char(this->next());
         }
         token.kind = TokenKind::Integer;
         token.lexeme = lexeme;
@@ -320,13 +322,13 @@ Token Tokenizer::read_number(void){
         lexeme += 'o';
         this->advance();
         Str octals = "01234567";
-        c = toChar(this->next());
+        c = _to_char(this->next());
         if(octals.find(c) == Str::npos){
             throw Error(Error::Kind::SyntaxError, "malfomed integer in octal format");
         }
         while((octals.find(c) != Str::npos) && !this->is_eof()){
             lexeme += c;
-            c = toChar(this->next());
+            c = _to_char(this->next());
         }
         token.kind = TokenKind::Integer;
         token.lexeme = lexeme;
@@ -336,13 +338,13 @@ Token Tokenizer::read_number(void){
         lexeme += 'b';
         this->advance();
         Str hexadecs = "0123456789abcdefABCDEF";
-        c = toChar(this->next());
+        c = _to_char(this->next());
         if(hexadecs.find(c) == Str::npos){
             throw Error(Error::Kind::SyntaxError, "malfomed integer in hexadecimal format");
         }
         while((hexadecs.find(c)!= Str::npos) && !this->is_eof()){
             lexeme += c;
-            c = toChar(this->next());
+            c = _to_char(this->next());
         }
         token.kind = TokenKind::Integer;
         token.lexeme = lexeme;
@@ -360,10 +362,10 @@ Token Tokenizer::read_number(void){
         return token;
     }
     // (03) fractional part
-    c = toChar(this->next());
+    c = _to_char(this->next());
     while(std::isdigit(c) && !this->is_eof()){
         lexeme += c;
-        c = toChar(this->next());
+        c = _to_char(this->next());
     }
     // (04) potential 'e' or 'E'
     if(c == 'e' || c == 'E'){
@@ -375,7 +377,7 @@ Token Tokenizer::read_number(void){
             token.lexeme = lexeme;
             return token;
         }
-        c = toChar(this->next());
+        c = _to_char(this->next());
     }
     // possibly '+' or '-'
     if(c == '+' || c == '-'){
@@ -384,12 +386,12 @@ Token Tokenizer::read_number(void){
         if(this->is_eof()){
             throw Error(Error::Kind::SyntaxError, "malformed floating-point number");
         }
-        c = toChar(this->next());
+        c = _to_char(this->next());
     }
     if(std::isdigit(c)){
         while(std::isdigit(c) && !this->is_eof()){
             lexeme += c;
-            c = toChar(this->next());
+            c = _to_char(this->next());
         }
     }else{
         throw Error(Error::Kind::SyntaxError, "malformed floating-point number");
@@ -399,6 +401,98 @@ Token Tokenizer::read_number(void){
     token.lexeme = lexeme;
 
     return token;
+}
+
+// -*-
+Token Tokenizer::read_str(void){
+    Str lexeme{};
+    auto row = this->m_row;
+    auto col = this->m_col;
+    auto c = _to_char(this->next());
+    while(c != '"' && !this->is_eof()){
+        if(c == '\\'){
+            auto cur = _to_char(this->m_cur);
+            switch(cur){
+            case EOF:
+                throw Error(Error::Kind::Default, "unexpected end-of-file");
+            case '\\':
+                lexeme += "\\";
+                this->advance();
+                break;
+            case 'n':
+                lexeme += "\n";
+                this->advance();
+                break;
+            case 'r':
+                lexeme += "\r";
+                this->advance();
+                break;
+            case 'f':
+                lexeme += "\f";
+                this->advance();
+                break;
+            case 't':
+                lexeme += "\t";
+                this->advance();
+                break;
+            default:
+                break;
+            }
+        }else{
+            lexeme += c;
+        }
+        c = _to_char(this->next());
+    }
+    if(this->is_eof()){
+        throw Error(Error::Kind::Default, "unexpected end-of-file");
+    }
+    // skip the closing double-quote
+    //this->advance();
+    Token token{};
+    token.kind = TokenKind::String;
+    token.lexeme = lexeme;
+    token.row = row;
+    token.col = col;
+    return token;
+}
+
+// -*-
+i32 Tokenizer::next(void){
+    //! @todo
+    return 0;
+}
+
+// -*-
+void Tokenizer::advance(void){
+    //! @todo
+}
+
+// -*-
+char Tokenizer::peek(){
+    //! @todo
+    return 0;
+}
+
+// -*-
+void Tokenizer::skip_whitespace(void){
+    //! @todo
+}
+
+// -*-
+void Tokenizer::skip_comment(void){
+    //! @todo
+}
+
+// -*-
+bool Tokenizer::match(const Str& ident){
+    //! @todo
+    return false;
+}
+
+// -*-
+bool Tokenizer::is_eof(void){
+    //! @todo
+    return false;
 }
 
 /*
@@ -417,14 +511,9 @@ private:
 // Token Tokenizer::read_bool(void){}
 // Token Tokenizer::read_integer(void){}
 // Token Tokenizer::read_float(void){}
-Token Tokenizer::read_str(void){}
+
     //Token read_list(void);
-i32 Tokenizer::next(void){}
-char Tokenizer::peek(){}
-void Tokenizer::skip_whitespace(void){}
-void Tokenizer::skip_comment(void){}
-bool Tokenizer::match(const Str& ident){}
-bool Tokenizer::is_eof(void){}
+
 };
 
 */
