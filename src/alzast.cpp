@@ -470,6 +470,21 @@ Str MacroAst::name(void) const{
     return this->m_name.lexeme;
 }
 
+// -*-
+Vec<Symbol> MacroAst::params(void) const{
+    Vec<Symbol> result{};
+    for(const auto& token: this->m_params){
+        auto lexeme = token.lexeme;
+        if(!_is_identifier(lexeme)){
+            std::stringstream stream;
+            stream << "invalid macro parameter `" << lexeme << "'";
+            throw Error(Error::Kind::Default, stream.str());
+        }
+        result.emplace_back(lexeme);
+    }
+    return result;
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -491,7 +506,6 @@ public:
     ~MacroAst() = default;
 
 
-Vec<Symbol> MacroAst::params(void) const{}
 Vec<Ast> MacroAst::body(void) const{}
 // Env MacroAst::scope(void) const{}
 Ast MacroAst::expand(void) const{}
