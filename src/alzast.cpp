@@ -124,6 +124,33 @@ FloatAst::FloatAst(Token token)
 : AstBase{AstKind::Float}
 , m_token{token} {}
 
+// -*-
+Object FloatAst::eval([[maybe_unused]] Env& env){
+    auto lexeme = this->m_token.lexeme;
+    f64 num{};
+    try{
+        num = std::stod(lexeme);
+    }catch(std::invalid_argument& err){
+        std::stringstream stream;
+        stream << err.what() << "\n";
+        stream << "at Line " << this->m_token.row;
+        stream << " and column " << this->m_token.col;
+        throw Error(Error::Kind::ValueError, stream.str());
+    }catch(std::out_of_range& err){
+        std::stringstream stream;
+        stream << err.what() << "\n";
+        stream << "at Line " << this->m_token.row;
+        stream << " and column " << this->m_token.col;
+        throw Error(Error::Kind::ValueError, stream.str());
+    }catch(...){
+        std::stringstream stream;
+        stream << "unexpected error occured";
+        throw Error(Error::Kind::Default, stream.str());
+    }
+
+    return Object(num);
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -143,7 +170,6 @@ protected:
 class FloatAst final: public AstBase{
 public:
     ~FloatAst() = default;
-Object FloatAst::eval([[maybe_unused]] Env& env){}
 Str FloatAst::str(void) const{}
 Str FloatAst::repr(void) const{}
 Token FloatAst::literal(){}
