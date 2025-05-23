@@ -180,6 +180,11 @@ Object StringAst::eval([[maybe_unused]] Env& env){
     return Object(this->m_token.lexeme);
 }
 
+// -*-
+Str StringAst::str(void) const{
+    return this->m_token.lexeme;
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -200,7 +205,6 @@ protected:
 class StringAst final: public AstBase{
 public:
     ~StringAst() = default;
-Str StringAst::str(void) const{}
 Str StringAst::repr(void) const{}
 Str StringAst::literal(void) const{}
 
