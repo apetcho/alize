@@ -163,6 +163,11 @@ Str FloatAst::repr(void) const{
     return stream.str();
 }
 
+// -*-
+Str FloatAst::literal(){
+    return this->m_token.lexeme;
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -184,7 +189,7 @@ public:
     ~FloatAst() = default;
 
 
-Token FloatAst::literal(){}
+
 
 private:
     Token m_token;

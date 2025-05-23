@@ -417,7 +417,7 @@ public:
     Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
-    Token literal();
+    Str literal();
 
 private:
     Token m_token;
