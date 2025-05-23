@@ -465,6 +465,11 @@ Str MacroAst::repr(void) const{
     return stream.str();    
 }
 
+// -*-
+Str MacroAst::name(void) const{
+    return this->m_name.lexeme;
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -486,8 +491,6 @@ public:
     ~MacroAst() = default;
 
 
-
-Str MacroAst::name(void) const{}
 Vec<Symbol> MacroAst::params(void) const{}
 Vec<Ast> MacroAst::body(void) const{}
 // Env MacroAst::scope(void) const{}
