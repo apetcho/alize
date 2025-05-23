@@ -6,6 +6,23 @@
 // -*----------------------------------------------------------------*-
 namespace alz{
 // -*-
+static const std::set<Str> _RESERVED_WORDS = {
+    "import", "let", "var", "cond", "for",
+    "progn", "if", "macro", "fun", "lambda"
+};
+
+static const std::set<Str> _RESERVED_CONSTANTS{
+    "true", "false", "nil",
+};
+
+static inline bool _is_reserved_word(const Str& word){
+    return _RESERVED_WORDS.find(word) != _RESERVED_WORDS.end();
+}
+
+static inline bool _is_reserved_constant(const Str& word){
+    return _RESERVED_CONSTANTS.find(word) != _RESERVED_CONSTANTS.end();
+}
+
 // -*------------------*-
 // -*- Identifier AST -*-
 // -*------------------*-
@@ -24,12 +41,16 @@ Object IdentAst::eval([[maybe_unused]] Env& env){
     if(lexeme == "true"){ return Object(true); }
     if(lexeme == "false"){ return Object(false); }
     if(lexeme == "nil"){ return Object(); }
-    auto iter = _reservedWords.find(lexeme);
-    if(iter != _reservedWords.end()){ // it is a reserved word
+    if(_is_reserved_word(lexeme)){ // it is a reserved word
         return Object(Symbol(lexeme));
     }
     // it is a user-defined identifier or builtin function or constant identifier
-    return Object(Symbol(this->m_token.lexeme));
+    return env.get(lexeme);
+}
+
+// -*-
+Str IdentAst::str(void) const{
+    return this->m_token.lexeme;
 }
 
 /*
@@ -52,9 +73,8 @@ class IdentAst:: final: public AstBase{
 public:
     ~IdentAst() = default;
 
-Str IdentAst::str(void) const override;
-Str IdentAst::repr(void) const override;
-Str IdentAst::literal(void) const;
+Str IdentAst::repr(void) const{}
+Str IdentAst::literal(void) const{}
 
 private:
     Token m_token; // nil, true, false, *reserved-word*, *var-or-func-name*
