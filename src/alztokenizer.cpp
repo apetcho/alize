@@ -411,10 +411,11 @@ Token Tokenizer::read_str(void){
     auto c = _to_char(this->next());
     while(c != '"' && !this->is_eof()){
         if(c == '\\'){
+            if(this->m_cur == EOF){
+                throw Error(Error::Kind::Default, "unexpected end-of-file");
+            }
             auto cur = _to_char(this->m_cur);
             switch(cur){
-            case EOF:
-                throw Error(Error::Kind::Default, "unexpected end-of-file");
             case '\\':
                 lexeme += "\\";
                 this->advance();
@@ -458,8 +459,14 @@ Token Tokenizer::read_str(void){
 
 // -*-
 i32 Tokenizer::next(void){
-    //! @todo
-    return 0;
+    auto result = this->m_cur;
+    ++this->m_pos;
+    if(this->is_eof()){
+        this->m_cur = EOF;
+    }else{
+        this->m_cur = this->m_src[this->m_pos];
+    }
+    return result;
 }
 
 // -*-
