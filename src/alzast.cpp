@@ -116,6 +116,14 @@ Str IntegerAst::literal(void) const{
     return this->m_token.lexeme;
 }
 
+// -*-------------*-
+// -*- Float AST -*-
+// -*-------------*-
+// [+-][0-9]+\.[0-9]+[eE][+-][0-9]+ | "numstr"
+FloatAst::FloatAst(Token token)
+: AstBase{AstKind::Float}
+, m_token{token} {}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -131,24 +139,14 @@ protected:
     AstKind m_kind;
 };
 
-class IntegerAst:: final: public AstBase{
-public:
-    ~IntegerAst() = default;
 
-private:
-    Str m_literal;
-};
-
-// -*- Float AST -*-
-// [+-][0-9]+\.[0-9]+[eE][+-][0-9]+ | "numstr"
 class FloatAst final: public AstBase{
 public:
-FloatAst::FloatAst(Token token);
     ~FloatAst() = default;
-Object FloatAst::eval([[maybe_unused]] Env& env) override;
-Str FloatAst::str(void) const override;
-Str FloatAst::repr(void) const override;
-Token FloatAst::literal();
+Object FloatAst::eval([[maybe_unused]] Env& env){}
+Str FloatAst::str(void) const{}
+Str FloatAst::repr(void) const{}
+Token FloatAst::literal(){}
 
 private:
     Token m_token;
