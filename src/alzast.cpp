@@ -1,4 +1,5 @@
 #include "alize.hpp"
+#include<iomanip>
 #include<set>
 
 // -*----------------------------------------------------------------*-
@@ -103,6 +104,13 @@ Str IntegerAst::str(void) const{
     return this->m_token.lexeme;
 }
 
+// -*-
+Str IntegerAst::repr(void) const{
+    std::stringstream stream;
+    stream << "\"" << this->m_token.lexeme << "\"";
+    return stream.str();
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -122,7 +130,7 @@ class IntegerAst:: final: public AstBase{
 public:
     ~IntegerAst() = default;
 
-Str IntegerAst::repr(void) const{}
+
 Str IntegerAst::literal(void) const{}
 
 private:
