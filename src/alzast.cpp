@@ -390,6 +390,13 @@ Object FunAst::eval([[maybe_unused]] Env& env){
     return Object(Closure(*this, env));
 }
 
+Str FunAst::str(void) const{
+    std::stringstream stream;
+    stream << "Function `" << this->m_name.lexeme << "' at ";
+    stream << std::hex << &this->m_body;
+    return stream.str();
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -409,7 +416,6 @@ protected:
 class FunAst final: public AstBase{
 public:
     ~FunAst() = default;
-Str FunAst::str(void) const{}
 Str FunAst::repr(void) const{}
 
 Str FunAst::name(void) const{}
