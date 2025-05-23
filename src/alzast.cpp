@@ -58,6 +58,11 @@ Str IdentAst::repr(void) const{
     return this->m_token.lexeme;
 }
 
+// -*-
+Str IdentAst::literal(void) const{
+    return this->m_token.lexeme;
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -73,17 +78,6 @@ protected:
     AstKind m_kind;
 };
 
-
-class IdentAst:: final: public AstBase{
-public:
-    ~IdentAst() = default;
-
-
-Str IdentAst::literal(void) const{}
-
-private:
-    Token m_token; // nil, true, false, *reserved-word*, *var-or-func-name*
-};
 
 // -*- Integer AST -*-
 // [-+](0b[01]+)|(0o[0-7]+)|(0x[0-9]+)
