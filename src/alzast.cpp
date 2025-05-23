@@ -409,6 +409,21 @@ Str FunAst::name(void) const{
     return this->m_name.lexeme;
 }
 
+// -*-
+Vec<Symbol> FunAst::params(void) const{
+    Vec<Symbol> result{};
+    for(const auto& token: this->m_params){
+        auto lexeme = token.lexeme;
+        if(!_is_identifier(lexeme)){
+            std::stringstream stream;
+            stream << "invalid function parameter `" << lexeme << "'";
+            throw Error(Error::Kind::Default, stream.str());
+        }
+        result.emplace_back(lexeme);
+    }
+    return result;
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -430,7 +445,7 @@ public:
     ~FunAst() = default;
 
 
-Vec<Symbol> FunAst::params(void) const{}
+
 Vec<Ast> FunAst::body(void) const{}
 Env FunAst::scope(void) const{}
 
