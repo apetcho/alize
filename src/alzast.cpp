@@ -168,6 +168,14 @@ Str FloatAst::literal(){
     return this->m_token.lexeme;
 }
 
+// -*--------------*-
+// -*- String AST -*-
+// -*--------------*-
+StringAst::StringAst(Token token)
+: AstBase{AstKind::String}
+, m_token{token}{}
+
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -184,27 +192,14 @@ protected:
 };
 
 
-class FloatAst final: public AstBase{
-public:
-    ~FloatAst() = default;
-
-
-
-
-private:
-    Token m_token;
-};
-
-// -*- String AST -*-
 // "..."
 class StringAst final: public AstBase{
 public:
-StringAst::StringAst(Token token);
     ~StringAst() = default;
-Object StringAst::eval([[maybe_unused]] Env& env) override;
-Str StringAst::str(void) const override;
-Str StringAst::repr(void) const override;
-Str StringAst::literal(void) const;
+Object StringAst::eval([[maybe_unused]] Env& env){}
+Str StringAst::str(void) const{}
+Str StringAst::repr(void) const{}
+Str StringAst::literal(void) const{}
 
 private:
     Token m_token;
