@@ -110,10 +110,11 @@ private:
     enum Kind{Fun, Lambda, Macro};
     Kind m_kind;
     Ast m_ast;
+    Shared<Env> m_env;
 public:
-    explicit Closure(FunAst ast);
-    explicit Closure(LambdaAst ast);
-    explicit Closure(MacroAst ast);
+    explicit Closure(FunAst ast, Env& env);
+    explicit Closure(LambdaAst ast, Env& env);
+    explicit Closure(MacroAst ast, Env& env);
     ~Closure();
 
     Object operator()(Vec<Object> argv, Env& env);
@@ -470,7 +471,7 @@ public:
 private:
     Vec<Token> m_params;
     Vec<Ast> m_body;
-    Env m_scope;
+    // Env m_scope;
 };
 
 // -*- User-defined function AST -*-
@@ -492,7 +493,7 @@ private:
     Token m_name;
     Vec<Token> m_params;
     Vec<Ast> m_body;
-    Env m_scope;
+    // Env m_scope;
 };
 
 // -*- Macro AST -*-
@@ -515,7 +516,7 @@ private:
     Token m_name;
     Vec<Token> m_params;
     Vec<Ast> m_body;
-    Env m_scope;
+    // Env m_scope;
 };
 
 // -*- If AST -*-

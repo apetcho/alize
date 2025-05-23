@@ -315,6 +315,15 @@ Str ListAst::repr(void) const{
     return stream.str();
 }
 
+// -*--------------*-
+// -*- Lambda AST -*-
+// -*--------------*-
+// (lambda params body)
+LambdaAst::LambdaAst(Vec<Token> params, Vec<Ast> asts)
+: AstBase{AstKind::Lambda}
+, m_params{params}
+, m_body{asts}{}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -331,24 +340,22 @@ protected:
 };
 
 
-// -*- Lambda AST -*-
-// (lambda params body)
 class LambdaAst final: public AstBase{
 public:
-LambdaAst::LambdaAst(Vec<Token> params, Vec<Ast> asts);
-    ~LambdaAst() = default;
-Object LambdaAst::eval([[maybe_unused]] Env& env) override;
-Str LambdaAst::str(void) const override;
-Str LambdaAst::repr(void) const override;
 
-Vec<Symbol> LambdaAst::params(void) const;
-Vec<Ast> LambdaAst::body(void) const;
-Env LambdaAst::scope(void) const;
+    ~LambdaAst() = default;
+Object LambdaAst::eval([[maybe_unused]] Env& env){}
+Str LambdaAst::str(void) const{}
+Str LambdaAst::repr(void) const{}
+
+Vec<Symbol> LambdaAst::params(void) const{}
+Vec<Ast> LambdaAst::body(void) const{}
+// Env LambdaAst::scope(void) const{}
 
 private:
     Vec<Token> m_params;
     Vec<Ast> m_body;
-    Env m_scope;
+    // Env m_scope;
 };
 
 // -*- User-defined function AST -*-

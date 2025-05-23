@@ -12,21 +12,24 @@ namespace alz{
 // -*-----------*-
 // -*- Closure -*-
 // -*-----------*-
-Closure::Closure(FunAst ast)
+Closure::Closure(FunAst ast, Env& env)
 : m_kind{Closure::Kind::Fun}
 , m_ast{std::make_shared<FunAst>(ast)}
+, m_env{std::make_shared<Env>(&env)}
 {}
 
 // -*-
-Closure::Closure(LambdaAst ast)
+Closure::Closure(LambdaAst ast, Env& env)
 : m_kind{Closure::Kind::Lambda}
 , m_ast{std::make_shared<LambdaAst>(ast)}
+, m_env{std::make_shared<Env>(&env)}
 {}
 
 // -*-
-Closure::Closure(MacroAst ast)
+Closure::Closure(MacroAst ast, Env& env)
 : m_kind{Closure::Kind::Macro}
 , m_ast{std::make_shared<MacroAst>(ast)}
+, m_env{std::make_shared<Env>(&env)}
 {}
 
 // -*-
@@ -36,70 +39,71 @@ Closure::~Closure(){
 
 // -*-
 Object Closure::operator()(Vec<Object> argv, Env& env){
+    //! @todo: re-implement this method taking into account the class-member m_env
     Object result{};
-    if(this->is_function()){
-        auto ast = dynamic_cast<FunAst*>(this->m_ast.get());
-        if(ast == nullptr){
-            throw Error(
-                Error::Kind::RuntimeError,
-                "unexpected error occurred while creating a `function`"
-            );
-        }
-        auto params = ast->params();
-        if(params.size() != argv.size()){
-            throw Error(Error::Kind::SyntaxError, "arguments count mismatch");
-        }
-        auto scope = ast->scope();
-        scope.parent() = &env;
-        for(auto i=0; i < params.size(); i++){
-            auto key = static_cast<Str>(params[i]);
-            Object val(argv[i]);
-            scope.update(key, val);
-        }
-        result = ast->eval(scope);
-    }else if(this->is_lambda()){
-        auto ast = dynamic_cast<LambdaAst*>(this->m_ast.get());
-        if(ast == nullptr){
-            throw Error(
-                Error::Kind::RuntimeError, 
-                "unexpected error occurred while creating a `lambda`"
-            );
-        }
-        auto params = ast->params();
-        if(params.size() != argv.size()){
-            throw Error(Error::Kind::SyntaxError, "arguments count mismatch");
-        }
-        auto scope = ast->scope();
-        // scope.set_parent(&env);
-        scope.parent() = &env;
-        for(auto i=0; i < params.size(); i++){
-            auto key = static_cast<Str>(params[i]);
-            Object val(argv[i]);
-            scope.update(key, val);
-        }
-        result = ast->eval(scope);
-    }else if(this->is_macro()){
-        auto ast = dynamic_cast<MacroAst*>(this->m_ast.get());
-        if(ast == nullptr){
-            throw Error(
-                Error::Kind::RuntimeError,
-                "unexpected error occurred while creating a `macro`"
-            );
-        }
-        auto params = ast->params();
-        if(params.size() != argv.size()){
-            throw Error(Error::Kind::SyntaxError, "arguments count mismatch");
-        }
-        auto scope = ast->scope();
-        // scope.set_parent(&env);
-        scope.parent() = &env;
-        for(auto i=0; i < params.size(); i++){
-            auto key = static_cast<Str>(params[i]);
-            Object val(argv[i]);
-            scope.update(key, val);
-        }
-        result = ast->eval(scope);
-    }
+    // if(this->is_function()){
+    //     auto ast = dynamic_cast<FunAst*>(this->m_ast.get());
+    //     if(ast == nullptr){
+    //         throw Error(
+    //             Error::Kind::RuntimeError,
+    //             "unexpected error occurred while creating a `function`"
+    //         );
+    //     }
+    //     auto params = ast->params();
+    //     if(params.size() != argv.size()){
+    //         throw Error(Error::Kind::SyntaxError, "arguments count mismatch");
+    //     }
+    //     auto scope = ast->scope();
+    //     scope.parent() = &env;
+    //     for(auto i=0; i < params.size(); i++){
+    //         auto key = static_cast<Str>(params[i]);
+    //         Object val(argv[i]);
+    //         scope.update(key, val);
+    //     }
+    //     result = ast->eval(scope);
+    // }else if(this->is_lambda()){
+    //     auto ast = dynamic_cast<LambdaAst*>(this->m_ast.get());
+    //     if(ast == nullptr){
+    //         throw Error(
+    //             Error::Kind::RuntimeError, 
+    //             "unexpected error occurred while creating a `lambda`"
+    //         );
+    //     }
+    //     auto params = ast->params();
+    //     if(params.size() != argv.size()){
+    //         throw Error(Error::Kind::SyntaxError, "arguments count mismatch");
+    //     }
+    //     auto scope = ast->scope();
+    //     // scope.set_parent(&env);
+    //     scope.parent() = &env;
+    //     for(auto i=0; i < params.size(); i++){
+    //         auto key = static_cast<Str>(params[i]);
+    //         Object val(argv[i]);
+    //         scope.update(key, val);
+    //     }
+    //     result = ast->eval(scope);
+    // }else if(this->is_macro()){
+    //     auto ast = dynamic_cast<MacroAst*>(this->m_ast.get());
+    //     if(ast == nullptr){
+    //         throw Error(
+    //             Error::Kind::RuntimeError,
+    //             "unexpected error occurred while creating a `macro`"
+    //         );
+    //     }
+    //     auto params = ast->params();
+    //     if(params.size() != argv.size()){
+    //         throw Error(Error::Kind::SyntaxError, "arguments count mismatch");
+    //     }
+    //     auto scope = ast->scope();
+    //     // scope.set_parent(&env);
+    //     scope.parent() = &env;
+    //     for(auto i=0; i < params.size(); i++){
+    //         auto key = static_cast<Str>(params[i]);
+    //         Object val(argv[i]);
+    //         scope.update(key, val);
+    //     }
+    //     result = ast->eval(scope);
+    // }
 
     return result;
 }
