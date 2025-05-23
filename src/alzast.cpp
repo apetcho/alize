@@ -53,6 +53,11 @@ Str IdentAst::str(void) const{
     return this->m_token.lexeme;
 }
 
+// -*-
+Str IdentAst::repr(void) const{
+    return this->m_token.lexeme;
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -73,7 +78,7 @@ class IdentAst:: final: public AstBase{
 public:
     ~IdentAst() = default;
 
-Str IdentAst::repr(void) const{}
+
 Str IdentAst::literal(void) const{}
 
 private:
