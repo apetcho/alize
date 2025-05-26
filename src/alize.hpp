@@ -306,6 +306,41 @@ public:
     ~Tokenizer() = default;
 
     Vec<Token> tokenize(void);
+    static bool is_builtin_reserved_word(TokenKind kind){
+        // - import, var, fun, lambda, macro, progn
+        // - cond, let, if, for
+        static const std::map<TokenKind, Str> _myReservedWords{
+            {TokenKind::Import, "import"},
+            {TokenKind::Var, "var"},
+            {TokenKind::Let, "let"},
+            {TokenKind::If, "if"},
+            {TokenKind::For, "for"},
+            {TokenKind::Cond, "cond"},
+            {TokenKind::Progn, "progn"},
+            {TokenKind::Fun, "fun"},
+            {TokenKind::Macro, "macro"},
+            {TokenKind::Lambda, "lambda"},
+        };
+        auto entry = _myReservedWords.find(kind);
+        if(entry == _myReservedWords.end()){
+            return false;
+        }
+        return true;
+    }
+    
+    static bool is_builtin_constant(TokenKind kind){
+        // - nil, true, false
+        static const std::map<TokenKind, Str> _myConstants{
+            {TokenKind::Nil, "nil"},
+            {TokenKind::True, "true"},
+            {TokenKind::False, "false"},
+        };
+        auto entry = _myConstants.find(kind);
+        if(entry == _myConstants.end()){
+            return false;
+        }
+        return true;
+    }
 
 private:
     Token next_token(void);
@@ -333,7 +368,6 @@ public:
 // -*------------------------*-
 #define ALIZE_AST_KINDS()                           \
     ALIZE_DEF(Ident, "IDENITIFIER")                 \
-    ALIZE_DEF(Boolean, "BOOLEAN")                   \
     ALIZE_DEF(Integer, "INTEGER")                   \
     ALIZE_DEF(Float, "FLOAT")                       \
     ALIZE_DEF(String, "STRING")                     \
@@ -449,6 +483,7 @@ public:
     Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
+    Vec<Token> tokens(void) const{ return this->m_vec; }
 
 private:
     Vec<Token> m_vec;
@@ -510,7 +545,7 @@ public:
     Vec<Symbol> params(void) const;
     Vec<Ast> body(void) const;
     // Env scope(void) const;
-    Object expand(void) const; // return a closure (<function>) object
+    Ast expand(void) const; // return a closure (<function>) object
 
 private:
     Token m_name;
