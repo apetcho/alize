@@ -327,7 +327,7 @@ public:
         }
         return true;
     }
-    
+
     static bool is_builtin_constant(TokenKind kind){
         // - nil, true, false
         static const std::map<TokenKind, Str> _myConstants{
@@ -340,6 +340,21 @@ public:
             return false;
         }
         return true;
+    }
+    static bool is_number(TokenKind kind){
+        return (
+            kind==TokenKind::Integer ||
+            kind==TokenKind::Float
+        );
+    }
+
+    static bool is_identifier(TokenKind kind){
+        return (
+            !Tokenizer::is_builtin_constant(kind) &&
+            !Tokenizer::is_builtin_reserved_word(kind) &&
+            !Tokenizer::is_number(kind) &&
+            !(kind == TokenKind::String)
+        );
     }
 
 private:
@@ -545,7 +560,7 @@ public:
     Vec<Symbol> params(void) const;
     Vec<Ast> body(void) const;
     // Env scope(void) const;
-    Ast expand(void) const; // return a closure (<function>) object
+    Vec<Ast> expand(void) const; // return a closure (<function>) object
 
 private:
     Token m_name;

@@ -232,6 +232,7 @@ Token Tokenizer::read_identifier(void){
         {"cond", TokenKind::Cond},
         {"progn", TokenKind::Progn},
         {"let", TokenKind::Let},
+        {"import", TokenKind::Import},
     };
     Str lexeme{};
     auto c = static_cast<char>(this->m_cur);

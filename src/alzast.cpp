@@ -490,6 +490,134 @@ Vec<Ast> MacroAst::body(void) const{
     return this->m_body;
 }
 
+// -*-
+Vec<Ast> MacroAst::expand(void) const{
+    /*
+    // algorithm for evaluating a quasiquoted S-expression:
+    // 1) incremenent the quasiquote counter
+    // 2) if the atom isn't a list, evaluate it as a quoted atom and decrement the quasiquote counter.
+    // 3) if the atom is a list...
+    //  a) If the car of the list is unquoted, decrement the quasiquote counter. If the quasiquote
+    //     counter is zero, evaluate the car of the list. If the counter is less than zero, error.
+    //     If the counter is greater than zero, evaluate the car of the list as a quoted atom.
+    //  b) If the car of the list is not quoted, evaluate the car of the list as a quoted atom.
+    //  c) Evaluate the cdr of the list (goto step 2)
+    */
+    //! @todo
+    // (01) Handling `quote`
+    // (02) Handling `unquote`
+    // (03) Handling `quasiquote`
+    // (04) Handling `unquote-splicing`
+    Vec<Ast> result{};
+    for(const auto& ast: this->body()){
+        if(ast->kind()==AstKind::List){
+            auto self = dynamic_cast<ListAst*>(ast.get());
+            if(self == nullptr){
+                throw Error(Error::Kind::RuntimeError, "unexpected error occured");
+            }
+            auto tokens = self->tokens();
+            if(tokens.size() > 1){
+                auto car = tokens[0];
+                if(car.kind == TokenKind::LParen){
+                    auto iter = tokens.begin();
+                    tokens.erase(iter);     // remove '('
+                    iter = tokens.end()-1;
+                    if(iter->kind != TokenKind::RParen){
+                        throw Error(Error::Kind::SyntaxError, "malformed list");
+                    }
+                    tokens.erase(iter);     // remove ')'
+                    for(auto i=0; i < tokens.size(); i++){
+                        auto token = tokens[i];
+                        if(Tokenizer::is_identifier(token.kind)){
+                            // function-call like syntax: (identifier ...)
+                            //! @note: unallowed identifiers in macro: {"import", "fun", "macro" }
+                            //! @note: allowed identifiers:
+                            //  {
+                            //      "var", "let", "cond", "progn", "if", "for", "lambda",
+                            //      "nil", "true", "false",
+                            //      <<BuiltinFunctionsOrVariables>>,
+                            //      <<UserDefinedFunctionsOrVariables>>,
+                            //  }
+                            std::set<Str> _UnallowdIdentifiers{"import", "fun", "macro" };
+                            if(_UnallowdIdentifiers.find(token.lexeme)!=_UnallowdIdentifiers.end()){
+                                std::stringstream stream;
+                                stream << "token `" << token.lexeme << "` is not allowed in ";
+                                stream << "the body of a macro";
+                                throw Error(Error::Kind::SyntaxError, stream.str());
+                            }else{
+                                // special treatement of "quote", "unquote", "quasiquote",
+                                // "unquote-splicing"
+                                if(token.lexeme == "quote"){
+                                    //! @todo
+                                }else if(token.lexeme == "unquote"){
+                                    //! @todo
+                                }else if(token.lexeme == "quasiquote"){
+                                    //! @todo
+                                }else if(token.lexeme == "unquote-splicing"){
+                                    //! @todo
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    switch(car.kind){
+                    case TokenKind::Nil:
+                    case TokenKind::True:
+                    case TokenKind::False:
+                    case TokenKind::Ident:
+                        result.push_back(std::make_shared<IdentAst>(car));
+                        break;
+                    case TokenKind::Integer:
+                        result.push_back(std::make_shared<IntegerAst>(car));
+                        break;
+                    case TokenKind::Float:
+                        result.push_back(std::make_shared<FloatAst>(car));
+                        break;
+                    case TokenKind::String:
+                        result.push_back(std::make_shared<StringAst>(car));
+                        break;
+                    default:{
+                            std::stringstream stream;
+                            stream << "unexpected error occured in macro `" << this->name() << "' ";
+                            stream << "at line " << car.row << " and column " << car.row;
+                            throw Error(Error::Kind::RuntimeError, stream.str());
+                        }
+                    }
+                }
+            }else if(tokens.size() == 1){
+                auto token = tokens[0];
+                switch(token.kind){
+                case TokenKind::Nil:
+                case TokenKind::True:
+                case TokenKind::False:
+                case TokenKind::Ident:
+                    result.push_back(std::make_shared<IdentAst>(token));
+                    break;
+                case TokenKind::Integer:
+                    result.push_back(std::make_shared<IntegerAst>(token));
+                    break;
+                case TokenKind::Float:
+                    result.push_back(std::make_shared<FloatAst>(token));
+                    break;
+                case TokenKind::String:
+                    result.push_back(std::make_shared<StringAst>(token));
+                    break;
+                default:{
+                        std::stringstream stream;
+                        stream << "unexpected error occured in macro `" << this->name() << "' ";
+                        stream << "at line " << token.row << " and column " << token.row;
+                        throw Error(Error::Kind::RuntimeError, stream.str());
+                    }
+                }
+            }
+        }else{
+            result.push_back(std::move(ast));
+        }
+    }
+
+    return result;
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -513,7 +641,6 @@ public:
 
 
 // Env MacroAst::scope(void) const{}
-Ast MacroAst::expand(void) const{}
 
 private:
     Token m_name;
