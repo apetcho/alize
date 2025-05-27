@@ -684,6 +684,13 @@ VarAst::VarAst(Token name, Ast ast)
 , m_name{name}, m_value{std::move(ast)}
 {}
 
+// -*-
+Object VarAst::eval([[maybe_unused]] Env& env){
+    if(this->m_value == nullptr){ return Object(); }
+    return this->m_value->eval(env);
+}
+
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -704,9 +711,9 @@ class VarAst final: public AstBase{
 public:
 
     ~VarAst() = default;
-Object VarAst::eval([[maybe_unused]] Env& env) override;
-Str VarAst::str(void) const override;
-Str VarAst::repr(void) const override;
+
+Str VarAst::str(void) const{}
+Str VarAst::repr(void) const{};
 
 private:
     Token m_name;
