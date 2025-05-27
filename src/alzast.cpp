@@ -777,8 +777,16 @@ Object ForAst::eval([[maybe_unused]] Env& env){
 // -*-
 Str ForAst::str(void) const{
     std::stringstream stream;
-    stream << "(for (" << this->m_var.lexeme << " (";
-    
+    stream << "(for (" << this->m_var.lexeme << " ";
+    auto tokens = this->m_iterable.tokens();
+    for(const auto& tok: tokens){
+        stream << tok.lexeme << " ";
+    }
+    stream << ")\n";
+    for(const auto& ast: this->m_body){
+        stream << "    " << ast->str() << "\n";
+    }
+    stream << ")";
 
     return stream.str();
 }
