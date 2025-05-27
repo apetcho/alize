@@ -695,6 +695,11 @@ Str VarAst::str(void) const{
     return this->m_value->str();
 }
 
+// -*-
+Str VarAst::repr(void) const{
+    if(this->m_value == nullptr){ return "\"nil\""; }
+    return this->m_value->repr();
+}
 
 /*
 // -*- AstBase -*-
@@ -718,7 +723,6 @@ public:
     ~VarAst() = default;
 
 
-Str VarAst::repr(void) const{};
 
 private:
     Token m_name;
