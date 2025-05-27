@@ -666,6 +666,16 @@ Str IfAst::str(void) const{
     return stream.str();
 }
 
+// -*-
+Str IfAst::repr(void) const{
+    std::stringstream stream;
+    stream << "(if " << this->m_test->repr();
+    stream << this->m_okay->repr() << " ";
+    stream << this->m_alt->repr() << ")";
+    return stream.str();
+}
+
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -688,7 +698,7 @@ public:
     ~IfAst() = default;
 
 
-Str IfAst::repr(void) const{}
+
 
 private:
     Ast m_test;
