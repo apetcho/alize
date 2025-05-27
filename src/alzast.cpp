@@ -675,6 +675,14 @@ Str IfAst::repr(void) const{
     return stream.str();
 }
 
+// -*--------------*-
+// -*- Define AST -*-
+// -*--------------*-
+// (var name sexpr)
+VarAst::VarAst(Token name, Ast ast)
+: AstBase{AstKind::Var}
+, m_name{name}, m_value{std::move(ast)}
+{}
 
 /*
 // -*- AstBase -*-
@@ -692,25 +700,9 @@ protected:
 };
 
 
-class IfAst final: public AstBase{
-public:
-
-    ~IfAst() = default;
-
-
-
-
-private:
-    Ast m_test;
-    Ast m_okay;
-    Ast m_alt;
-};
-
-// -*- Define AST -*-
-// (define name sexpr)
 class VarAst final: public AstBase{
 public:
-VarAst::VarAst(Token name, Ast ast);
+
     ~VarAst() = default;
 Object VarAst::eval([[maybe_unused]] Env& env) override;
 Str VarAst::str(void) const override;
@@ -718,7 +710,7 @@ Str VarAst::repr(void) const override;
 
 private:
     Token m_name;
-    Ast m_ast;
+    Ast m_value;
 };
 
 // -*- Progn AST -*-

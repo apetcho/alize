@@ -597,7 +597,7 @@ public:
 
 private:
     Token m_name;
-    Ast m_ast;
+    Ast m_value;
 };
 
 // -*- Progn AST -*-
