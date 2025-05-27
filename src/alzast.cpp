@@ -791,6 +791,23 @@ Str ForAst::str(void) const{
     return stream.str();
 }
 
+// -*-
+Str ForAst::repr(void) const{
+    std::stringstream stream;
+    stream << "(for (" << this->m_var.lexeme << " ";
+    auto tokens = this->m_iterable.tokens();
+    for(const auto& tok: tokens){
+        stream << tok.lexeme << " ";
+    }
+    stream << ")\n";
+    for(const auto& ast: this->m_body){
+        stream << "    " << ast->repr() << "\n";
+    }
+    stream << ")";
+
+    return stream.str();
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -812,7 +829,7 @@ public:
     ~ForAst() = default;
 
 
-Str ForAst::repr(void) const{}
+
 
 private:
     Vec<Ast> m_args; // (x xs)
