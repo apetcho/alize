@@ -744,10 +744,10 @@ Str PrognAst::repr(void) const{
 // -*- For AST -*-
 // -*-----------*-
 // (for (x xs) body)
-ForAst::ForAst(Token var, Vec<Ast> iterable, Vec<Ast> body)
+ForAst::ForAst(Token var, ListAst iterable, Vec<Ast> body)
 : AstBase{AstKind::For}
 , m_var{var}
-, m_iterable{std::move(iterable)}
+, m_iterable{iterable}
 , m_body{std::move(body)}
 {}
 
@@ -759,14 +759,28 @@ Object ForAst::eval([[maybe_unused]] Env& env){
         throw Error(Error::Kind::SyntaxError, "malformed `for` expression");
     }
     ctx.put(this->m_var.lexeme, Object());
-    for(const auto& item: this->m_iterable){
-        ctx.update(this->m_var.lexeme, item->eval(env));
-        for(const auto& ast: this->m_body){
-            result = ast->eval(ctx);
+    auto self = this->m_iterable.eval(env);
+    if(!self.is_list()){
+        throw Error(Error::Kind::SyntaxError, "malformed `for` expression");
+    }
+    auto vec = static_cast<Args>(self);
+    for(const auto& elem: vec){
+        ctx.update(this->m_var.lexeme, elem);
+        for(const auto& x: this->m_body){
+            result = x->eval(ctx);
         }
     }
 
     return result;
+}
+
+// -*-
+Str ForAst::str(void) const{
+    std::stringstream stream;
+    stream << "(for (" << this->m_var.lexeme << " (";
+    
+
+    return stream.str();
 }
 
 /*
@@ -789,7 +803,7 @@ public:
 
     ~ForAst() = default;
 
-Str ForAst::str(void) const{}
+
 Str ForAst::repr(void) const{}
 
 private:
