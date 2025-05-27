@@ -657,6 +657,14 @@ Object IfAst::eval([[maybe_unused]] Env& env){
     return this->m_alt->eval(env);
 }
 
+// -*-
+Str IfAst::str(void) const{
+    std::stringstream stream;
+    stream << "(if " << this->m_test->str();
+    stream << this->m_okay->str() << " ";
+    stream << this->m_alt->str() << ")";
+    return stream.str();
+}
 
 /*
 // -*- AstBase -*-
@@ -679,7 +687,7 @@ public:
 
     ~IfAst() = default;
 
-Str IfAst::str(void) const{}
+
 Str IfAst::repr(void) const{}
 
 private:
