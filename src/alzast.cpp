@@ -718,6 +718,18 @@ Object PrognAst::eval([[maybe_unused]] Env& env){
     return result;
 }
 
+// -*-
+Str PrognAst::str(void) const{
+    std::stringstream stream;
+    stream << "(progn\n";
+    for(const auto& ast: this->m_body){
+        stream << ast->str();
+    }
+    stream << "\n)";
+    return stream.str();
+}
+
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -737,7 +749,7 @@ class PrognAst final: public AstBase{
 public:
 
     ~PrognAst() = default;
-Str PrognAst::str(void) const{}
+
 Str PrognAst::repr(void) const{}
 
 private:
