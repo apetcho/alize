@@ -618,14 +618,15 @@ private:
 // (for (x xs) body)
 class ForAst final: public AstBase{
 public:
-    explicit ForAst(Vec<Ast> args, Vec<Ast> body);
+    explicit ForAst(Token var, Vec<Ast> args, Vec<Ast> body);
     ~ForAst() = default;
     Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
 
 private:
-    Vec<Ast> m_args; // (x xs)
+    Token m_var; // (x xs)
+    Vec<Ast> m_iterable;
     Vec<Ast> m_body; // body
 };
 

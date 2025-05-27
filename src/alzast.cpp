@@ -744,12 +744,30 @@ Str PrognAst::repr(void) const{
 // -*- For AST -*-
 // -*-----------*-
 // (for (x xs) body)
-ForAst::ForAst(Vec<Ast> args, Vec<Ast> body)
+ForAst::ForAst(Token var, Vec<Ast> iterable, Vec<Ast> body)
 : AstBase{AstKind::For}
-, m_args{std::move(args)}
+, m_var{var}
+, m_iterable{std::move(iterable)}
 , m_body{std::move(body)}
 {}
 
+// -*-
+Object ForAst::eval([[maybe_unused]] Env& env){
+    Object result{};
+    Env ctx(&env);
+    if(this->m_var.kind != TokenKind::Ident){
+        throw Error(Error::Kind::SyntaxError, "malformed `for` expression");
+    }
+    ctx.put(this->m_var.lexeme, Object());
+    for(const auto& item: this->m_iterable){
+        ctx.update(this->m_var.lexeme, item->eval(env));
+        for(const auto& ast: this->m_body){
+            result = ast->eval(ctx);
+        }
+    }
+
+    return result;
+}
 
 /*
 // -*- AstBase -*-
@@ -770,7 +788,7 @@ class ForAst final: public AstBase{
 public:
 
     ~ForAst() = default;
-Object ForAst::eval([[maybe_unused]] Env& env){}
+
 Str ForAst::str(void) const{}
 Str ForAst::repr(void) const{}
 
