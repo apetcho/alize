@@ -729,6 +729,16 @@ Str PrognAst::str(void) const{
     return stream.str();
 }
 
+// -*-
+Str PrognAst::repr(void) const{
+    std::stringstream stream;
+    stream << "(progn\n";
+    for(const auto& ast: this->m_body){
+        stream << ast->repr();
+    }
+    stream << "\n)";
+    return stream.str();
+}
 
 /*
 // -*- AstBase -*-
@@ -750,7 +760,7 @@ public:
 
     ~PrognAst() = default;
 
-Str PrognAst::repr(void) const{}
+
 
 private:
     Vec<Ast> m_body;
