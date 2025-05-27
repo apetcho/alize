@@ -740,6 +740,17 @@ Str PrognAst::repr(void) const{
     return stream.str();
 }
 
+// -*-----------*-
+// -*- For AST -*-
+// -*-----------*-
+// (for (x xs) body)
+ForAst::ForAst(Vec<Ast> args, Vec<Ast> body)
+: AstBase{AstKind::For}
+, m_args{std::move(args)}
+, m_body{std::move(body)}
+{}
+
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -755,26 +766,13 @@ protected:
     AstKind m_kind;
 };
 
-class PrognAst final: public AstBase{
-public:
-
-    ~PrognAst() = default;
-
-
-
-private:
-    Vec<Ast> m_body;
-};
-
-// -*- For AST -*-
-// (for (x xs) body)
 class ForAst final: public AstBase{
 public:
-ForAst::ForAst(Vec<Ast> args, Vec<Ast> body);
+
     ~ForAst() = default;
-Object ForAst::eval([[maybe_unused]] Env& env) override;
-Str ForAst::str(void) const override;
-Str ForAst::repr(void) const override;
+Object ForAst::eval([[maybe_unused]] Env& env){}
+Str ForAst::str(void) const{}
+Str ForAst::repr(void) const{}
 
 private:
     Vec<Ast> m_args; // (x xs)
