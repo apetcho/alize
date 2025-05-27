@@ -701,6 +701,15 @@ Str VarAst::repr(void) const{
     return this->m_value->repr();
 }
 
+// -*-------------*-
+// -*- Progn AST -*-
+// -*-------------*-
+// (progn ...)
+PrognAst::PrognAst(Vec<Ast> body)
+: AstBase{AstKind::Progn}
+, m_body{std::move(body)}{}
+
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -716,24 +725,9 @@ protected:
     AstKind m_kind;
 };
 
-
-class VarAst final: public AstBase{
-public:
-
-    ~VarAst() = default;
-
-
-
-private:
-    Token m_name;
-    Ast m_value;
-};
-
-// -*- Progn AST -*-
-// (progn ...)
 class PrognAst final: public AstBase{
 public:
-PrognAst::PrognAst(Vec<Ast> body);
+
     ~PrognAst() = default;
 Object PrognAst::eval([[maybe_unused]] Env& env) override;
 Str PrognAst::str(void) const override;
