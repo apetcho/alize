@@ -637,6 +637,18 @@ Vec<Ast> MacroAst::expand(void) const{
     return result;
 }
 
+// -*----------*-
+// -*- If AST -*-
+// -*----------*-
+// (if test ok alt)
+IfAst::IfAst(Ast test, Ast okay, Ast alt)
+: AstBase{AstKind::If}
+, m_test{std::move(test)}
+, m_okay{std::move(okay)}
+, m_alt{std::move(alt)}
+{}
+
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -653,30 +665,13 @@ protected:
 };
 
 
-class MacroAst:: final: public AstBase{
-public:
-    ~MacroAst() = default;
-
-
-
-// Env MacroAst::scope(void) const{}
-
-private:
-    Token m_name;
-    Vec<Token> m_params;
-    Vec<Ast> m_body;
-    // Env m_scope;
-};
-
-// -*- If AST -*-
-// (if test ok alt)
 class IfAst final: public AstBase{
 public:
-IfAst::IfAst(Ast test, Ast okay, Ast alt);
+
     ~IfAst() = default;
-Object IfAst::eval([[maybe_unused]] Env& env) override;
-Str IfAst::str(void) const override;
-Str IfAst::repr(void) const override;
+
+Str IfAst::str(void) const{}
+Str IfAst::repr(void) const{}
 
 private:
     Ast m_test;
