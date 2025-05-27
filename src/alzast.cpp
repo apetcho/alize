@@ -690,6 +690,11 @@ Object VarAst::eval([[maybe_unused]] Env& env){
     return this->m_value->eval(env);
 }
 
+Str VarAst::str(void) const{
+    if(this->m_value == nullptr){ return "nil"; }
+    return this->m_value->str();
+}
+
 
 /*
 // -*- AstBase -*-
@@ -712,7 +717,7 @@ public:
 
     ~VarAst() = default;
 
-Str VarAst::str(void) const{}
+
 Str VarAst::repr(void) const{};
 
 private:
