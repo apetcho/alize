@@ -648,6 +648,15 @@ IfAst::IfAst(Ast test, Ast okay, Ast alt)
 , m_alt{std::move(alt)}
 {}
 
+// -*-
+Object IfAst::eval([[maybe_unused]] Env& env){
+    auto test = static_cast<bool>(this->m_test->eval(env));
+    if(test){
+        return this->m_okay->eval(env);
+    }
+    return this->m_alt->eval(env);
+}
+
 
 /*
 // -*- AstBase -*-
