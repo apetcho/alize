@@ -709,6 +709,14 @@ PrognAst::PrognAst(Vec<Ast> body)
 : AstBase{AstKind::Progn}
 , m_body{std::move(body)}{}
 
+// -*-
+Object PrognAst::eval([[maybe_unused]] Env& env){
+    Object result{};
+    for(const auto ast: this->m_body){
+        result = ast->eval(env);
+    }
+    return result;
+}
 
 /*
 // -*- AstBase -*-
@@ -729,9 +737,8 @@ class PrognAst final: public AstBase{
 public:
 
     ~PrognAst() = default;
-Object PrognAst::eval([[maybe_unused]] Env& env) override;
-Str PrognAst::str(void) const override;
-Str PrognAst::repr(void) const override;
+Str PrognAst::str(void) const{}
+Str PrognAst::repr(void) const{}
 
 private:
     Vec<Ast> m_body;
