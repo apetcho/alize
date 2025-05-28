@@ -899,6 +899,16 @@ Str ImportAst::repr(void) const{
     return stream.str();
 }
 
+// -*-----------*-
+// -*- Let AST -*-
+// -*-----------*-
+// (let ((x xval) (y yval) ...) body)
+LetAst::LetAst(Vec<ListAst> defs, Vec<Ast> body)
+: AstBase{AstKind::Let}
+, m_defs{std::move(defs)}
+, m_body{std::move(body)}
+{}
+
 
 /*
 // -*- AstBase -*-
@@ -915,18 +925,15 @@ protected:
     AstKind m_kind;
 };
 
-// -*-----------*-
-// -*- Let AST -*-
-// -*-----------*-
-// (let ((x xval) (y yval) ...) body)
+
 class LetAst:: final: public AstBase{
 public:
 
-LetAst::LetAst(Vec<ListAst> defs, Vec<Ast> body);
+
     ~LetAst() = default;
-Object LetAst::eval([[maybe_unused]] Env& env) override;
-Str LetAst::str(void) const override;
-Str LetAst::repr(void) const override;
+Object LetAst::eval([[maybe_unused]] Env& env){}
+Str LetAst::str(void) const{}
+Str LetAst::repr(void) const{}
 
 private:
     Vec<ListAst> m_defs;
