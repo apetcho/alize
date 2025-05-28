@@ -820,6 +820,21 @@ CondAst::CondAst(Vec<std::pair<Ast, Ast>> clauses)
 , m_clauses{std::move(clauses)}
 {}
 
+// -*-
+Object CondAst::eval([[maybe_unused]] Env& env){
+    Object result{};
+    for(const auto& clause: this->m_clauses){
+        auto test = clause.first;
+        auto self = clause.second;
+        if(test->eval(env)){
+            result = self->eval(env);
+            break;
+        }
+    }
+
+    return result;
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -841,9 +856,9 @@ public:
 
 
     ~CondAst() = default;
-Object CondAst::eval([[maybe_unused]] Env& env) override;
-Str CondAst::str(void) const override;
-Str CondAst::repr(void) const override;
+
+Str CondAst::str(void) const{}
+Str CondAst::repr(void) const{}
 
 private:
     Vec<std::pair<Ast, Ast>> m_clauses;
