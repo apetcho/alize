@@ -885,6 +885,13 @@ Object ImportAst::eval([[maybe_unused]] Env& env){
     return Object(); // nil
 }
 
+// -*-
+Str ImportAst::str(void) const{
+    std::stringstream stream;
+    stream << "(import " << this->m_sym.data << ")";
+    return stream.str();
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -908,7 +915,7 @@ public:
 
 ~ImportAst() = default;
 
-Str ImportAst::str(void) const{}
+
 Str ImportAst::repr(void) const{}
 
 private:
