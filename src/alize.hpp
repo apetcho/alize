@@ -9,6 +9,7 @@
 #include<sstream>
 #include<variant>
 #include<optional>
+#include<utility>
 #include<memory>
 #include<string>
 #include<vector>
@@ -634,14 +635,14 @@ private:
 // (cond (tst1 ast1) (tst2 ast2) ...  )
 class CondAst final: public AstBase{
 public:
-    explicit CondAst(Vec<Ast> clauses);
+    explicit CondAst(Vec<std::pair<Ast, Ast>> clauses);
     ~CondAst() = default;
     Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
 
 private:
-    Vec<Ast> m_clauses;
+    Vec<std::pair<Ast, Ast>> m_clauses;
 };
 
 // -*--------------*-

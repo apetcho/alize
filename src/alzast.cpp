@@ -808,6 +808,18 @@ Str ForAst::repr(void) const{
     return stream.str();
 }
 
+// -*------------*-
+// -*- Cond AST -*-
+// -*------------*-
+// (cond 
+//      (tst1 ast1)
+//      (tst2 ast2)
+//       ...  )
+CondAst::CondAst(Vec<std::pair<Ast, Ast>> clauses)
+: AstBase{AstKind::Cond}
+, m_clauses{std::move(clauses)}
+{}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -823,31 +835,18 @@ protected:
     AstKind m_kind;
 };
 
-class ForAst final: public AstBase{
-public:
 
-    ~ForAst() = default;
-
-
-
-
-private:
-    Vec<Ast> m_args; // (x xs)
-    Vec<Ast> m_body; // body
-};
-
-// -*- Cond AST -*-
-// (cond (tst1 ast1) (tst2 ast2) ...  )
 class CondAst final: public AstBase{
 public:
-CondAst::CondAst(Vec<Ast> clauses);
+
+
     ~CondAst() = default;
 Object CondAst::eval([[maybe_unused]] Env& env) override;
 Str CondAst::str(void) const override;
 Str CondAst::repr(void) const override;
 
 private:
-    Vec<Ast> m_clauses;
+    Vec<std::pair<Ast, Ast>> m_clauses;
 };
 
 // -*--------------*-
