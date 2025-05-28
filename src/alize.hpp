@@ -14,6 +14,7 @@
 #include<string>
 #include<vector>
 #include<map>
+#include<set>
 
 namespace fs = std::filesystem;
 
@@ -224,6 +225,7 @@ public:
     Object get(Str key);
     bool contains(const Str key);
     Env*& parent(void);
+    Dict bindings(void) const{ return this->m_bindings; }
 private:
     Dict m_bindings;
     Env* m_parent;
@@ -659,7 +661,6 @@ public:
 
 private:
     Symbol m_sym;
-    fs::path m_path;
 };
 
 // -*-----------*-
@@ -709,89 +710,120 @@ private:
 // -*-
 namespace builtins{
 // -*-
-    Object fn_quote(Args argv);
-    Object fn_quasiquote(Args argv);
-    Object fn_unquote(Args argv);
-    Object fn_unquote_splicing(Args argv);
-    Object fn_and(Args argv);
-    Object fn_or(Args argv);
-    Object fn_not(Args argv);
+    Object fn_bool(Args argv);                  // (bool x)
+    Object fn_integer(Args argv);               // (integer x)
+    Object fn_float(Args argv);                 // (float x)
+    Object fn_string(Args argv);                // (string x)
+    Object fn_symbol(Args argv);                // (symbol xstring)
+    Object fn_list(Args argv);                  // (list x1 ...)
+    Object fn_boolp(Args argv);                 // (bool? x)
+    Object fn_integerp(Args argv);              // (integer? x)
+    Object fn_floatp(Args argv);                // (float? x)
+    Object fn_stringp(Args argv);               // (string? x)
+    Object fn_functionp(Args argv);             // (function? x)
+    Object fn_lambdap(Args argv);               // (lambda? x)
+    Object fn_macrop(Args argv);                // (macro? x)
+    Object fn_variablep(Args argv);             // (variable? x)
+    Object fn_closurep(Args argv);              // (closure? x)
+    Object fn_callablep(Args argv);             // (callable? x)
+    Object fn_listp(Args argv);                 // (list? x)
+    Object fn_quote(Args argv);                 // (quote arg)
+    Object fn_quasiquote(Args argv);            // (quasiquote arg)
+    Object fn_unquote(Args argv);               // (unquote arg)
+    Object fn_unquote_splicing(Args argv);      // (unquote-splicing arg)
+    Object fn_and(Args argv);                   // (and x1 x2 ...)
+    Object fn_or(Args argv);                    // (or x1 x2 ...)
+    Object fn_not(Args argv);                   // (not arg)
 
-    Object fn_add(Args argv);
-    Object fn_sub(Args argv);
-    Object fn_mul(Args argv);
-    Object fn_mod(Args argv);
-    Object fn_div(Args argv);
+    Object fn_add(Args argv);                   // (+ x1 x2 ...)
+    Object fn_sub(Args argv);                   // (- x1 ...)
+    Object fn_mul(Args argv);                   // (* x1 x2 ...)
+    Object fn_mod(Args argv);                   // (% x1 x2)
+    Object fn_div(Args argv);                   // (/ x1 x2 ...)
 
-    Object fn_len(Args argv);
-    Object fn_get(Args argv);
-    Object fn_insert(Args argv);
-    Object fn_push(Args argv);
-    Object fn_pop(Args argv);
-    Object fn_index(Args argv);
+    Object fn_first(Args argv);                 // (first xs)
+    Object fn_rest(Args argv);                  // (rest xs)
+    Object fn_last(Args argv);                  // (last xs)
+    Object fn_len(Args argv);                   // (len xs)  | (len string)
+    Object fn_get(Args argv);                   // (get idx xs) | (get idx string)
+    Object fn_insert(Args argv);                // (insert idx xs val) | (insert idx string other)
+    Object fn_push(Args argv);                  // (push xs val) | (push string other)
+    Object fn_pop(Args argv);                   // (pop [idx] xs) | (pop [idx] string)
+    Object fn_index(Args argv);                 // (index xs val) | (index string other)
 
-    Object fn_ltrim(Args argv);
-    Object fn_rtrim(Args argv);
-    Object fn_trim(Args argv);
-    Object fn_lower(Args argv);
-    Object fn_upper(Args argv);
-    Object fn_replace(Args argv);
-    Object fn_join(Args argv);
-    Object fn_split(Args argv);
-    Object fn_startswith(Args argv);
-    Object fn_endswith(Args argv);
+    Object fn_ltrim(Args argv);                 // (ltrim string)
+    Object fn_rtrim(Args argv);                 // (rtrim string)
+    Object fn_trim(Args argv);                  // (trim string)
+    Object fn_lower(Args argv);                 // (tolower string)
+    Object fn_upper(Args argv);                 // (toupper string)
+    Object fn_replace(Args argv);               // (replace string old neo) | (replace xs old neo)
+    Object fn_join(Args argv);                  // (join string [other|'(x1str ...)])
+    Object fn_split(Args argv);                 // (split string sep)
+    Object fn_startswith(Args argv);            // (startswith string)
+    Object fn_endswith(Args argv);              // (endswidth string)
 
-    Object fn_addpath(Args argv);
-    Object fn_println(Args argv);
-    Object fn_eprintln(Args argv);
-    Object fn_print(Args argv);
-    Object fn_eprint(Args argv);
-    Object fn_panic(Args argv);
-    Object fn_format(Args argv);
-    Object fn_random(Args argv);
-    Object fn_filter(Args argv);
-    Object fn_map(Args argv);
-    Object fn_reduce(Args argv);
-    Object fn_zip(Args argv);
+    Object fn_addpath(Args argv);               // (addpath name path)
+    Object fn_println(Args argv);               // (println x1 ...)
+    Object fn_eprintln(Args argv);              // (eprintln x1 ...)
+    Object fn_print(Args argv);                 // (print x1 ...)
+    Object fn_eprint(Args argv);                // (eprint x1 ...)
+    Object fn_panic(Args argv);                 // (panic msg)
+    Object fn_format(Args argv);                // (format fmt arg ...)
+    Object fn_typeof(Args argv);                // (typeof x)
+    Object fn_random(Args argv);                // (random [[[min] max]])
+    Object fn_filter(Args argv);                // (filter fn xs)
+    Object fn_map(Args argv);                   // (map fn xs)
+    Object fn_reduce(Args argv);                // (reduce fn xs)
+    Object fn_zip(Args argv);                   // (zip x1s x2s)
 
     // -*- math -*-
-    Object fn_abs(Args argv);
-    Object fn_max(Args argv);
-    Object fn_min(Args argv);
-    Object fn_floor(Args argv);
-    Object fn_ceil(Args argv);
-    Object fn_round(Args argv);
-    Object fn_trunc(Args argv);
-    Object fn_sin(Args argv);
-    Object fn_cos(Args argv);
-    Object fn_tan(Args argv);
-    Object fn_asin(Args argv);
-    Object fn_acos(Args argv);
-    Object fn_atan(Args argv);
-    Object fn_atan2(Args argv);
-    Object fn_sinh(Args argv);
-    Object fn_cosh(Args argv);
-    Object fn_tanh(Args argv);
-    Object fn_asinh(Args argv);
-    Object fn_acosh(Args argv);
-    Object fn_atanh(Args argv);
-    Object fn_erf(Args argv);
-    Object fn_erfc(Args argv);
-    Object fn_gamma(Args argv);
-    Object fn_lgamma(Args argv);
-    Object fn_pow(Args argv);
-    Object fn_sqrt(Args argv);
-    Object fn_cbrt(Args argv);
-    Object fn_exp(Args argv);
-    Object fn_exp2(Args argv);
-    Object fn_expm1(Args argv);
-    Object fn_log(Args argv);
-    Object fn_log2(Args argv);
-    Object fn_log1p(Args argv);
-    Object fn_fma(Args argv);
+    Object fn_abs(Args argv);                   // (abs x) | (abs xs)
+    Object fn_max(Args argv);                   // (max x1 x2 ...) | (max xs)
+    Object fn_min(Args argv);                   // (min x1 x2 ...) | (min xs)
+    Object fn_floor(Args argv);                 // (floor x) | (floor xs)
+    Object fn_ceil(Args argv);                  // (ceil x) | (ceil xs)
+    Object fn_round(Args argv);                 // (round x) | (round xs)
+    Object fn_trunc(Args argv);                 // (truncate x) | (truncate xs)
+    Object fn_sin(Args argv);                   // (sin x) | (sin xs)
+    Object fn_cos(Args argv);                   // (cos x) | (cos xs)
+    Object fn_tan(Args argv);                   // (tan x) | (tan xs)
+    Object fn_asin(Args argv);                  // (asin x) | (asin xs)
+    Object fn_acos(Args argv);                  // (acos x) | (acos xs)
+    Object fn_atan(Args argv);                  // (atan x) | (atan xs)
+    Object fn_atan2(Args argv);                 // (atan2 x y) | (atan2 xs ys)
+    Object fn_sinh(Args argv);                  // (sinh x) | (sinh xs)
+    Object fn_cosh(Args argv);                  // (cosh x) | (cosh xs)
+    Object fn_tanh(Args argv);                  // (tanh x) | (tanh xs)
+    Object fn_asinh(Args argv);                 // (asinh x) | (asinh xs)
+    Object fn_acosh(Args argv);                 // (acosh x) | (acosh xs)
+    Object fn_atanh(Args argv);                 // (atanh x) | (atanh xs)
+    Object fn_erf(Args argv);                   // (erf x) | (erf xs)
+    Object fn_erfc(Args argv);                  // (erfc x) | (erfc xs)
+    Object fn_gamma(Args argv);                 // (gamma x) | (gamma xs)
+    Object fn_lgamma(Args argv);                // (lgamm x) | (lgamma xs)
+    Object fn_pow(Args argv);                   // (pow x) | (pow xs)
+    Object fn_sqrt(Args argv);                  // (sqrt x) | (sqrt xs)
+    Object fn_cbrt(Args argv);                  // (cbrt x) | (cbrt xs)
+    Object fn_exp(Args argv);                   // (exp x) | (exp xs)
+    Object fn_exp2(Args argv);                  // (exp2 x) | (exp2 xs)
+    Object fn_expm1(Args argv);                 // (expm1 x) | (expm1 xs)
+    Object fn_log(Args argv);                   // (log x) | (log xs)
+    Object fn_log2(Args argv);                  // (log2 x) | (log2 xs)
+    Object fn_log1p(Args argv);                 // (log1p x) | (log1p xs)
+    Object fn_fma(Args argv);                   // (fma x) | (fma xs)
 
 // -*-
 }
+
+// -*-
+struct Module{
+    Str name;
+    fs::path path;
+
+    explicit Module(const Str& name, const fs::path& path);
+    Env eval();
+    friend bool operator==(const Module& lhs, const Module& rhs);
+};
 
 // -*---------*-
 // -*- Alize -*-
@@ -805,6 +837,7 @@ public:
     static void repl(Vec<Str> argv);
 
     static Env runtime;
+    static std::set<fs::path*> rpaths;
     static void initialize(void);
 
     // -*-
@@ -824,6 +857,8 @@ public:
 
 private:
     static Dict prelude;
+    static std::map<Str, Module> m_modules;
+    
     static void initialize_prelude(void);
 };
 

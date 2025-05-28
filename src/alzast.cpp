@@ -859,6 +859,15 @@ Str CondAst::repr(void) const{
     return stream.str();
 }
 
+// -*--------------*-
+// -*- Import AST -*-
+// -*--------------*-
+// (import modulename)
+ImportAst::ImportAst(Symbol sym)
+: AstBase{AstKind::Import}
+, m_sym{sym}{}
+
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -875,27 +884,11 @@ protected:
 };
 
 
-class CondAst final: public AstBase{
-public:
-
-
-    ~CondAst() = default;
-
-
-
-
-private:
-    Vec<std::pair<Ast, Ast>> m_clauses;
-};
-
-// -*--------------*-
-// -*- Import AST -*-
-// -*--------------*-
-// (import modulename)
 class ImportAst final: public AstBase{
 public:
 
-ImportAst::ImportAst(Symbol sym);
+
+
 ~ImportAst() = default;
 Object ImportAst::eval([[maybe_unused]] Env& env) override;
 Str ImportAst::str(void) const override;
@@ -903,7 +896,6 @@ Str ImportAst::repr(void) const override;
 
 private:
     Symbol m_sym;
-    fs::path m_path;
 };
 
 // -*-----------*-
