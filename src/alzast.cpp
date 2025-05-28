@@ -949,34 +949,20 @@ Str LetAst::str(void) const{
     return stream.str();
 }
 
-
-/*
-// -*- AstBase -*-
-class AstBase{
-public:
-    AstBase(AstKind kind): m_kind{kind}{}
-    virtual ~AstBase() = default;
-    AstKind kind() const { return this->m_kind; }
-    virtual Object eval([[maybe_unused]] Env& env) = 0;
-    virtual Str str(void) const = 0;
-    virtual Str repr(void) const = 0;
-
-protected:
-    AstKind m_kind;
-};
-
-
-class LetAst:: final: public AstBase{
-public:
-    ~LetAst() = default;
-
-Str LetAst::repr(void) const{}
-
-private:
-    Vec<std::pair<Token, Ast>> m_defs;
-    Vec<Ast> m_body;
-};
-*/
+// -*-
+Str LetAst::repr(void) const{
+    std::stringstream stream;
+    stream << "(let (";
+    for(const auto& def: this->m_defs){
+        stream << "(" << def.first.lexeme << " " << def.second->repr() << ")\n";
+    }
+    stream << ")";
+    for(const auto& ast: this->m_body){
+        stream << ast->repr() << "\n";
+    }
+    stream << ")";
+    return stream.str();
+}
 
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::alz                                          -*-
