@@ -697,7 +697,7 @@ private:
     Object parse_list(void);
     Object parse_fun(void);
     Object parse_macro(void);
-    Object parse_define(void);
+    Object parse_var(void);
     Object parse_lambda(void);
     Object parse_progn(void);
     Object parse_if(void);
