@@ -867,6 +867,23 @@ ImportAst::ImportAst(Symbol sym)
 : AstBase{AstKind::Import}
 , m_sym{sym}{}
 
+// -*-
+Object ImportAst::eval([[maybe_unused]] Env& env){
+    auto name = this->m_sym.data;
+    auto entry = Alize::modules.find(name);
+    if(entry == Alize::modules.end()){
+        std::stringstream stream;
+        stream << "Module `" << name << "' is not available on this system.";
+        throw Error(Error::Kind::RuntimeError, stream.str());
+    }
+    auto self = entry->second;
+    auto bindings = self.eval().bindings();
+    // populate the current environment
+    for(auto [key, val]: bindings){
+        env.put(key, val);
+    }
+    return Object(); // nil
+}
 
 /*
 // -*- AstBase -*-
@@ -890,9 +907,9 @@ public:
 
 
 ~ImportAst() = default;
-Object ImportAst::eval([[maybe_unused]] Env& env) override;
-Str ImportAst::str(void) const override;
-Str ImportAst::repr(void) const override;
+
+Str ImportAst::str(void) const{}
+Str ImportAst::repr(void) const{}
 
 private:
     Symbol m_sym;

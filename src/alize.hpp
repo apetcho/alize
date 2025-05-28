@@ -837,7 +837,7 @@ public:
     static void repl(Vec<Str> argv);
 
     static Env runtime;
-    static std::set<fs::path*> rpaths;
+    static std::map<Str, Module> modules;
     static void initialize(void);
 
     // -*-
