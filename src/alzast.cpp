@@ -892,6 +892,14 @@ Str ImportAst::str(void) const{
     return stream.str();
 }
 
+// -*-
+Str ImportAst::repr(void) const{
+    std::stringstream stream;
+    stream << "(import " << this->m_sym.data << ")";
+    return stream.str();
+}
+
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -905,21 +913,6 @@ public:
 
 protected:
     AstKind m_kind;
-};
-
-
-class ImportAst final: public AstBase{
-public:
-
-
-
-~ImportAst() = default;
-
-
-Str ImportAst::repr(void) const{}
-
-private:
-    Symbol m_sym;
 };
 
 // -*-----------*-
