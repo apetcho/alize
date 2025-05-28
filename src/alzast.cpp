@@ -934,6 +934,22 @@ Object LetAst::eval([[maybe_unused]] Env& env){
     return result;
 }
 
+// -*-
+Str LetAst::str(void) const{
+    std::stringstream stream;
+    stream << "(let (";
+    for(const auto& def: this->m_defs){
+        stream << "(" << def.first.lexeme << " " << def.second->str() << ")\n";
+    }
+    stream << ")";
+    for(const auto& ast: this->m_body){
+        stream << ast->str() << "\n";
+    }
+    stream << ")";
+    return stream.str();
+}
+
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -952,11 +968,8 @@ protected:
 
 class LetAst:: final: public AstBase{
 public:
-
-
     ~LetAst() = default;
 
-Str LetAst::str(void) const{}
 Str LetAst::repr(void) const{}
 
 private:
