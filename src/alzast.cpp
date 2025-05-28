@@ -903,12 +903,36 @@ Str ImportAst::repr(void) const{
 // -*- Let AST -*-
 // -*-----------*-
 // (let ((x xval) (y yval) ...) body)
-LetAst::LetAst(Vec<ListAst> defs, Vec<Ast> body)
+LetAst::LetAst(Vec<std::pair<Token, Ast>> defs, Vec<Ast> body)
 : AstBase{AstKind::Let}
 , m_defs{std::move(defs)}
 , m_body{std::move(body)}
 {}
 
+// -*-
+Object LetAst::eval([[maybe_unused]] Env& env){
+    Env ctx(&env);
+    // -*- add local definition into the context environment
+    for(const auto def: this->m_defs){
+        // def:  (vname val)
+        auto tok = def.first;
+        auto ast = def.second;
+        if(tok.kind != TokenKind::Ident){
+            std::stringstream stream;
+            stream <<  "malformed `let` expression on line " << tok.row;
+            stream << " and column " << tok.col << "\n";
+            stream << "Expected a symbol but got `" << tok.lexeme << "'";
+            throw Error(Error::Kind::SyntaxError, stream.str());
+        }
+        ctx.put(tok.lexeme, ast->eval(env));
+    }
+    // -*- Evaluate the body
+    Object result{};
+    for(const auto ast: this->m_body){
+        result = ast->eval(ctx);
+    }
+    return result;
+}
 
 /*
 // -*- AstBase -*-
@@ -931,12 +955,12 @@ public:
 
 
     ~LetAst() = default;
-Object LetAst::eval([[maybe_unused]] Env& env){}
+
 Str LetAst::str(void) const{}
 Str LetAst::repr(void) const{}
 
 private:
-    Vec<ListAst> m_defs;
+    Vec<std::pair<Token, Ast>> m_defs;
     Vec<Ast> m_body;
 };
 */

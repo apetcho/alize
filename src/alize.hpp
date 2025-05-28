@@ -669,14 +669,14 @@ private:
 // (let ((x xval) (y yval) ...) body)
 class LetAst final: public AstBase{
 public:
-    explicit LetAst(Vec<ListAst> defs, Vec<Ast> body);
+    explicit LetAst(Vec<std::pair<Token, Ast>> defs, Vec<Ast> body);
     ~LetAst() = default;
     Object eval([[maybe_unused]] Env& env) override;
     Str str(void) const override;
     Str repr(void) const override;
 
 private:
-    Vec<ListAst> m_defs;
+    Vec<std::pair<Token, Ast>> m_defs;
     Vec<Ast> m_body;
 };
 
