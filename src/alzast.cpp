@@ -846,6 +846,19 @@ Str CondAst::str(void) const{
 
     return stream.str();
 }
+
+// -*-
+Str CondAst::repr(void) const{
+    std::stringstream stream;
+    stream << "(cond\n";
+    for(const auto& clause: this->m_clauses){
+        stream << "(" << clause.first->repr() << " " << clause.second->repr() << ")\n";
+    }
+    stream << ")";
+
+    return stream.str();
+}
+
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -869,7 +882,7 @@ public:
     ~CondAst() = default;
 
 
-Str CondAst::repr(void) const{}
+
 
 private:
     Vec<std::pair<Ast, Ast>> m_clauses;
