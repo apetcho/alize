@@ -835,6 +835,17 @@ Object CondAst::eval([[maybe_unused]] Env& env){
     return result;
 }
 
+// -*-
+Str CondAst::str(void) const{
+    std::stringstream stream;
+    stream << "(cond\n";
+    for(const auto& clause: this->m_clauses){
+        stream << "(" << clause.first->str() << " " << clause.second->str() << ")\n";
+    }
+    stream << ")";
+
+    return stream.str();
+}
 /*
 // -*- AstBase -*-
 class AstBase{
@@ -857,7 +868,7 @@ public:
 
     ~CondAst() = default;
 
-Str CondAst::str(void) const{}
+
 Str CondAst::repr(void) const{}
 
 private:
