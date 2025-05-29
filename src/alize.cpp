@@ -479,6 +479,11 @@ bool Object::is_list(void) const{
     return this->m_typekind == TypeKind::List;
 }
 
+// -*-
+bool Object::is_env(void) const{
+    return this->m_typekind == TypeKind::Env;
+}
+
 // -*- stringifiers -*-
 Str Object::str(void) const{
     std::stringstream stream;
@@ -553,6 +558,16 @@ Str Object::str(void) const{
             }
         }
         break;
+    case TypeKind::Env:{
+            std::stringstream stream;
+            stream << "(\n";
+            auto bindings = std::get<Env>(this->m_value).bindings();
+            for(const auto& [key, val]: bindings){
+                stream << "    (" << key << " " << val.str() << ")\n";
+            }
+            stream << ")";
+        }
+        break;
     }
 
     return stream.str();
@@ -618,6 +633,16 @@ Str Object::repr(void) const{
                 }
                 stream << ")";
             }
+        }
+        break;
+    case TypeKind::Env:{
+            std::stringstream stream;
+            stream << "(\n";
+            auto bindings = std::get<Env>(this->m_value).bindings();
+            for(const auto& [key, val]: bindings){
+                stream << "    (" << key << " " << val.repr() << ")\n";
+            }
+            stream << ")";
         }
         break;
     }
