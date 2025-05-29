@@ -41,70 +41,6 @@ Closure::~Closure(){
 Object Closure::operator()(Vec<Object> argv, Env& env){
     //! @todo: re-implement this method taking into account the class-member m_env
     Object result{};
-    // if(this->is_function()){
-    //     auto ast = dynamic_cast<FunAst*>(this->m_ast.get());
-    //     if(ast == nullptr){
-    //         throw Error(
-    //             Error::Kind::RuntimeError,
-    //             "unexpected error occurred while creating a `function`"
-    //         );
-    //     }
-    //     auto params = ast->params();
-    //     if(params.size() != argv.size()){
-    //         throw Error(Error::Kind::SyntaxError, "arguments count mismatch");
-    //     }
-    //     auto scope = ast->scope();
-    //     scope.parent() = &env;
-    //     for(auto i=0; i < params.size(); i++){
-    //         auto key = static_cast<Str>(params[i]);
-    //         Object val(argv[i]);
-    //         scope.update(key, val);
-    //     }
-    //     result = ast->eval(scope);
-    // }else if(this->is_lambda()){
-    //     auto ast = dynamic_cast<LambdaAst*>(this->m_ast.get());
-    //     if(ast == nullptr){
-    //         throw Error(
-    //             Error::Kind::RuntimeError, 
-    //             "unexpected error occurred while creating a `lambda`"
-    //         );
-    //     }
-    //     auto params = ast->params();
-    //     if(params.size() != argv.size()){
-    //         throw Error(Error::Kind::SyntaxError, "arguments count mismatch");
-    //     }
-    //     auto scope = ast->scope();
-    //     // scope.set_parent(&env);
-    //     scope.parent() = &env;
-    //     for(auto i=0; i < params.size(); i++){
-    //         auto key = static_cast<Str>(params[i]);
-    //         Object val(argv[i]);
-    //         scope.update(key, val);
-    //     }
-    //     result = ast->eval(scope);
-    // }else if(this->is_macro()){
-    //     auto ast = dynamic_cast<MacroAst*>(this->m_ast.get());
-    //     if(ast == nullptr){
-    //         throw Error(
-    //             Error::Kind::RuntimeError,
-    //             "unexpected error occurred while creating a `macro`"
-    //         );
-    //     }
-    //     auto params = ast->params();
-    //     if(params.size() != argv.size()){
-    //         throw Error(Error::Kind::SyntaxError, "arguments count mismatch");
-    //     }
-    //     auto scope = ast->scope();
-    //     // scope.set_parent(&env);
-    //     scope.parent() = &env;
-    //     for(auto i=0; i < params.size(); i++){
-    //         auto key = static_cast<Str>(params[i]);
-    //         Object val(argv[i]);
-    //         scope.update(key, val);
-    //     }
-    //     result = ast->eval(scope);
-    // }
-
     return result;
 }
 
@@ -326,6 +262,10 @@ Object::Object(ArrayList xs)
 : m_typekind{TypeKind::List}
 , m_value{xs}{}
 
+// -*-
+Object::Object(const Env& env)
+: m_typekind{TypeKind::Env}
+, m_value{env}{}
 
 // -*-
 Object::Object(const Object& other)
@@ -479,6 +419,15 @@ Object::operator ArrayList(){
     std::stringstream stream;
     stream << "cannot convert `" << this->type().data << "' into `closure'";
     throw Error(Error::Kind::TypeError, stream.str());
+}
+
+// -*-
+Object::operator Env(){
+    if(!this->is_env()){
+        std::stringstream stream;
+        stream << "invalid type. Expected `Env' but got `" << this->type().data << "'";
+    }
+    return std::get<Env>(this->m_value);
 }
 
 // -*- Predicates -*-

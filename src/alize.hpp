@@ -129,6 +129,26 @@ public:
     const Ast& ast(void) const;
 };
 
+// -*-------*-
+// -*- Env -*-
+// -*-------*-
+class Env{
+public:
+    explicit Env();
+    explicit Env(Env* parent);
+    Env(const Env& other);
+    ~Env(){}
+    void put(Str key, const Object& val);
+    void update(Str key, const Object& val);
+    Object get(Str key);
+    bool contains(const Str key);
+    Env*& parent(void);
+    Dict bindings(void) const{ return this->m_bindings; }
+private:
+    Dict m_bindings;
+    Env* m_parent;
+};
+
 // -*----------*-
 // -*- Object -*-
 // -*----------*-
@@ -138,12 +158,13 @@ class Object{
     };
 
 #define ALIZE_VARIANTS  \
-    bool, i64, f64, Str, Symbol, CFun, Closure, ArrayList
+    bool, i64, f64, Str, Symbol, CFun, Closure, ArrayList, Env
 
     using Value = std::variant<ALIZE_VARIANTS>;
 
     enum class TypeKind{
-        Nil, Bool, Int, Float, String, Sym, Fn, Lambda, Fun, Macro, List,
+        Nil, Bool, Int, Float, String, Sym,
+        Fn, Lambda, Fun, Macro, List, Env,
     };
 public:
     explicit Object();                          // Nil
@@ -155,6 +176,7 @@ public:
     explicit Object(Str, CFun);                 // Builtin function
     explicit Object(Closure);                   // Fun, Lambda, Macro
     explicit Object(ArrayList);                 // List
+    explicit Object(const Env& env);            // Env: for import-expression
     explicit Object(const Object& other);
     Object(Object&& other);
     Object& operator=(const Object& other);
@@ -170,6 +192,7 @@ public:
     operator CFun();
     operator Closure();
     operator ArrayList();
+    operator Env();
     // -*- Predicates -*-
     bool is_nil(void) const;
     bool is_bool(void) const;
@@ -183,6 +206,7 @@ public:
     bool is_builtin_function(void) const;
     bool is_closure(void) const;
     bool is_list(void) const;
+    bool is_env(void) const;
 
     // -*- stringifiers -*-
     Str str(void) const;
@@ -209,26 +233,6 @@ private:
     TypeKind m_typekind;
     Option<Str> m_name{};
     Value m_value;
-};
-
-// -*-------*-
-// -*- Env -*-
-// -*-------*-
-class Env{
-public:
-    explicit Env();
-    explicit Env(Env* parent);
-    Env(const Env& other);
-    ~Env(){}
-    void put(Str key, const Object& val);
-    void update(Str key, const Object& val);
-    Object get(Str key);
-    bool contains(const Str key);
-    Env*& parent(void);
-    Dict bindings(void) const{ return this->m_bindings; }
-private:
-    Dict m_bindings;
-    Env* m_parent;
 };
 
 
@@ -685,26 +689,34 @@ private:
 class Parser final{
 private:
     Tokenizer m_tokenizer;
+    Token m_curTok;
+    u32 m_pos;
 
 public:
     Parser() = default;
     explicit Parser(const Str& src);
     explicit Parser(std::stringstream* stream);
-    Object parse(void);
+    Ast parse(void);
+    /*
+    
+    */
 
 private:
-    Object parse_atom(void); // nil, true, false, integer, float, string
-    Object parse_list(void);
-    Object parse_fun(void);
-    Object parse_macro(void);
-    Object parse_var(void);
-    Object parse_lambda(void);
-    Object parse_progn(void);
-    Object parse_if(void);
-    Object parse_cond(void);
-    Object parse_import(void);
+    Ast parse_atom(void); // nil, true, false, integer, float, string
+    Ast parse_list(void);
+    Ast parse_fun(void);
+    Ast parse_macro(void);
+    Ast parse_var(void);
+    Ast parse_lambda(void);
+    Ast parse_progn(void);
+    Ast parse_if(void);
+    Ast parse_cond(void);
+    Ast parse_import(void);
 
     bool expect(AstKind kind);
+    Token next_token();
+    Token peek(u32 from=0);
+    void advance(void);
 };
 
 // -*-
