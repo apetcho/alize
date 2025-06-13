@@ -14,33 +14,38 @@ namespace alz{
 //     //! @todo
 // }
 
-// Object Parser::parse(void){
+// Vec<Ast> Parser::parse(void){
 //     //! @todo
 //     return Object();
 // }
 
 //  // nil, true, false, integer, float, string
-// Object Parser::parse_atom(void){
+// Ast Parser::parse_atom(void){
 //     //! @todo
 //     return Object();
 // }
 
-// Object Parser::parse_list(void){
+// Ast Parser::parse_list(void){
 //     //! @todo
 //     return Object();
 // }
 
-// Object Parser::parse_fun(void){
+// Ast Parser::parse_ident(void){
 //     //! @todo
 //     return Object();
 // }
 
-// Object Parser::parse_macro(void){
+// Ast Parser::parse_fun(void){
 //     //! @todo
 //     return Object();
 // }
 
-// Object Parser::parse_var(void){
+// Ast Parser::parse_macro(void){
+//     //! @todo
+//     return Object();
+// }
+
+// Ast Parser::parse_var(void){
 //     //! @todo
 //     return Object();
 // }
@@ -50,22 +55,22 @@ namespace alz{
 //     return Object();
 // }
 
-// Object Parser::parse_progn(void){
+// Ast Parser::parse_progn(void){
 //     //! @todo
 //     return Object();
 // }
 
-// Object Parser::parse_if(void){
+// Ast Parser::parse_if(void){
 //     //! @todo
 //     return Object();
 // }
 
-// Object Parser::parse_cond(void){
+// Ast Parser::parse_cond(void){
 //     //! @todo
 //     return Object();
 // }
 
-// Object Parser::parse_import(void){
+// Ast Parser::parse_import(void){
 //     //! @todo
 //     return Object();
 // }

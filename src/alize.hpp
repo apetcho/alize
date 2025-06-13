@@ -28,8 +28,8 @@ namespace alz{
 class Env;
 class Object;
 class AstBase;
-class NilAst;
-class BoolAst;
+// class NilAst;
+// class BoolAst;
 class IdentAst;
 class IntegerAst;
 class FloatAst;
@@ -69,15 +69,19 @@ using i64 = std::int64_t;
 using u32 = std::uint32_t;
 using i32 = std::int32_t;
 using Str = std::string;
-using CFun = Object (*)(Vec<Object>);
-using ArrayList = Vec<Object>;
 using Dict = std::map<Str, Object>;
+using ArrayList = Vec<Object>;
 using Args = Vec<Object>;
+using CFun = Object (*)(Args);
+
 
 // -*-
 class Error final: std::runtime_error{
 public:
-    enum class Kind{Default, TypeError, ValueError, SyntaxError, RuntimeError};
+    enum class Kind{
+        Default, SymbolError, TypeError,
+        ValueError, SyntaxError, RuntimeError
+    };
     explicit Error(const Str& msg);
     explicit Error(Error::Kind kind, const Str& msg);
     ~Error() = default;
@@ -114,9 +118,9 @@ private:
     Ast m_ast;
     Shared<Env> m_env;
 public:
-    explicit Closure(FunAst ast, Env& env);
-    explicit Closure(LambdaAst ast, Env& env);
-    explicit Closure(MacroAst ast, Env& env);
+    explicit Closure(FunAst ast, Env& env) noexcept;
+    explicit Closure(LambdaAst ast, Env& env) noexcept;
+    explicit Closure(MacroAst ast, Env& env) noexcept;
     ~Closure();
 
     Object operator()(Vec<Object> argv, Env& env);
@@ -134,21 +138,23 @@ public:
 // -*-------*-
 class Env{
 public:
-    explicit Env();
-    explicit Env(Env* parent);
-    Env(const Env& other);
+    explicit Env() noexcept;
+    explicit Env(Env* parent) noexcept;
+    Env(const Env& other) noexcept;
     ~Env(){}
     void put(Str key, const Object& val);
     void update(Str key, const Object& val);
     Object get(Str key);
     bool contains(const Str key);
     Env*& parent(void);
-    Dict bindings(void) const{ return this->m_bindings; }
+    const Dict& bindings(void) const{ return this->m_bindings; }
+    Dict& bindings(void){ return this->m_bindings; }
 private:
     Dict m_bindings;
     Env* m_parent;
 };
 
+//! @todo: Add Complex numbers
 // -*----------*-
 // -*- Object -*-
 // -*----------*-
@@ -279,8 +285,6 @@ private:
     ALIZE_RESERVED_WORDS()
 
 
-// ALIZE_DEF()
-
 enum class TokenKind{
 #define ALIZE_DEF(tok, _) tok,
     ALIZE_TOKENS()
@@ -301,11 +305,11 @@ struct Token final{
 
 class Tokenizer final{
 private:
-    Str m_src;
-    i32 m_cur;
-    i32 m_pos;
-    i32 m_row;
-    i32 m_col;
+    Str m_src;  // source code
+    i32 m_cur;  // current position
+    i32 m_pos;  // current offset position
+    i32 m_row;  // current row
+    i32 m_col;  // current column
 
 public:
     Tokenizer() = default;
@@ -367,13 +371,9 @@ public:
 private:
     Token next_token(void);
     Token read_identifier(void);
-    // Token read_bool(void);
-    // Token read_integer(void);
-    // Token read_float(void);
     Token read_number(void);
     Token read_str(void);
-    //Token read_list(void);
-    i32 next(void);
+    i32 next(void); // move to the next position 
     void advance(void);
     char peek();
     void skip_whitespace(void);
@@ -388,6 +388,10 @@ public:
 // -*------------------------*-
 // -*- ABSTACT SYNTAX TREES -*-
 // -*------------------------*-
+//! @note: We could also add Quote, Unquote, Quasiquote, and Unquote-splicing
+// as independent node for building macro. But since, `quote`, `unquote`,
+// `quasiquote`, `unquote-splicing` symbols will be defined as builtin
+// functions.
 #define ALIZE_AST_KINDS()                           \
     ALIZE_DEF(Ident, "IDENITIFIER")                 \
     ALIZE_DEF(Integer, "INTEGER")                   \
@@ -632,9 +636,10 @@ public:
     Str repr(void) const override;
 
 private:
-    Token m_var; // (x xs)
-    ListAst m_iterable;
-    Vec<Ast> m_body; // body
+    //                      (x xs)
+    Token m_var;        //   ^  ^
+    ListAst m_iterable; //      |
+    Vec<Ast> m_body;    // body
 };
 
 // -*- Cond AST -*-
@@ -696,22 +701,35 @@ public:
     Parser() = default;
     explicit Parser(const Str& src);
     explicit Parser(std::stringstream* stream);
-    Ast parse(void);
-    /*
-    
-    */
+    Vec<Ast> parse(void);
 
 private:
-    Ast parse_atom(void); // nil, true, false, integer, float, string
+    // An atom is anything including:
+    //  - nil object
+    //  - true
+    //  - false
+    //  - integer
+    //  - float
+    //  - string
+    //  - identifier
+    Ast parse_atom(void); // nil, true, false, integer, float, string, identifier
+    // A list syntax can represent:
+    //  - function defintion:   (fun name(...) ...)
+    //  - lambda definition:    (lambda (...). ...)
+    //  - macro definition:     (macro name(...) ... )
+    //  - function call:        (func-name ...)
+    //  - other reserved word special forms, including:
+    //      * var, let, if, for, cond, progn
     Ast parse_list(void);
-    Ast parse_fun(void);
-    Ast parse_macro(void);
-    Ast parse_var(void);
-    Ast parse_lambda(void);
-    Ast parse_progn(void);
-    Ast parse_if(void);
-    Ast parse_cond(void);
-    Ast parse_import(void);
+    // Ast parse_ident(void);
+    // Ast parse_fun(void);
+    // Ast parse_macro(void);
+    // Ast parse_var(void);
+    // Ast parse_lambda(void);
+    // Ast parse_progn(void);
+    // Ast parse_if(void);
+    // Ast parse_cond(void);
+    // Ast parse_import(void);
 
     bool expect(AstKind kind);
     Token next_token();
@@ -721,7 +739,7 @@ private:
 
 // -*-
 namespace builtins{
-// -*-
+// -*- functions in the prelude
     Object fn_bool(Args argv);                  // (bool x)
     Object fn_integer(Args argv);               // (integer x)
     Object fn_float(Args argv);                 // (float x)
@@ -747,32 +765,40 @@ namespace builtins{
     Object fn_or(Args argv);                    // (or x1 x2 ...)
     Object fn_not(Args argv);                   // (not arg)
 
-    Object fn_add(Args argv);                   // (+ x1 x2 ...)
+    Object fn_add_num(Args argv);               // (+ x1 x2 ...)
+    Object fn_add_str(Args argv);               // (+ x1 x2 ...) | concat
+    Object fn_add_list(Args argv);              // (+ x1 x2 ...) | concat
     Object fn_sub(Args argv);                   // (- x1 ...)
     Object fn_mul(Args argv);                   // (* x1 x2 ...)
     Object fn_mod(Args argv);                   // (% x1 x2)
     Object fn_div(Args argv);                   // (/ x1 x2 ...)
 
-    Object fn_first(Args argv);                 // (first xs)
-    Object fn_rest(Args argv);                  // (rest xs)
-    Object fn_last(Args argv);                  // (last xs)
-    Object fn_len(Args argv);                   // (len xs)  | (len string)
-    Object fn_get(Args argv);                   // (get idx xs) | (get idx string)
-    Object fn_insert(Args argv);                // (insert idx xs val) | (insert idx string other)
-    Object fn_push(Args argv);                  // (push xs val) | (push string other)
-    Object fn_pop(Args argv);                   // (pop [idx] xs) | (pop [idx] string)
-    Object fn_index(Args argv);                 // (index xs val) | (index string other)
+    Object fn_list_first(Args argv);            // (first xs)
+    Object fn_list_rest(Args argv);             // (rest xs)
+    Object fn_list_last(Args argv);             // (last xs)
+    Object fn_list_len(Args argv);              // (len xs)  | (len string)
+    Object fn_list_get(Args argv);              // (get idx xs) | (get idx string)
+    Object fn_list_insert(Args argv);           // (insert idx xs val) | (insert idx string other)
+    Object fn_list_push(Args argv);             // (push xs val) | (push string other)
+    Object fn_list_pop(Args argv);              // (pop [idx] xs) | (pop [idx] string)
+    Object fn_list_index(Args argv);            // (index xs val) | (index string other)
 
-    Object fn_ltrim(Args argv);                 // (ltrim string)
-    Object fn_rtrim(Args argv);                 // (rtrim string)
-    Object fn_trim(Args argv);                  // (trim string)
-    Object fn_lower(Args argv);                 // (tolower string)
-    Object fn_upper(Args argv);                 // (toupper string)
-    Object fn_replace(Args argv);               // (replace string old neo) | (replace xs old neo)
-    Object fn_join(Args argv);                  // (join string [other|'(x1str ...)])
-    Object fn_split(Args argv);                 // (split string sep)
-    Object fn_startswith(Args argv);            // (startswith string)
-    Object fn_endswith(Args argv);              // (endswidth string)
+    Object fn_str_len(Args argv);               // (len xs)  | (len string)
+    Object fn_str_get(Args argv);               // (get idx xs) | (get idx string)
+    Object fn_str_insert(Args argv);            // (insert idx xs val) | (insert idx string other)
+    Object fn_str_push(Args argv);              // (push xs val) | (push string other)
+    Object fn_str_pop(Args argv);               // (pop [idx] xs) | (pop [idx] string)
+    Object fn_str_index(Args argv);             // (index xs val) | (index string other)
+    Object fn_str_ltrim(Args argv);             // (ltrim string)
+    Object fn_str_rtrim(Args argv);             // (rtrim string)
+    Object fn_str_trim(Args argv);              // (trim string)
+    Object fn_str_lower(Args argv);             // (tolower string)
+    Object fn_str_upper(Args argv);             // (toupper string)
+    Object fn_str_replace(Args argv);           // (replace string old neo) | (replace xs old neo)
+    Object fn_str_join(Args argv);              // (join string [other|'(x1str ...)])
+    Object fn_str_split(Args argv);             // (split string sep)
+    Object fn_str_startswith(Args argv);        // (startswith string)
+    Object fn_str_endswith(Args argv);          // (endswidth string)
 
     Object fn_addpath(Args argv);               // (addpath name path)
     Object fn_println(Args argv);               // (println x1 ...)
@@ -788,42 +814,41 @@ namespace builtins{
     Object fn_reduce(Args argv);                // (reduce fn xs)
     Object fn_zip(Args argv);                   // (zip x1s x2s)
 
-    // -*- math -*-
-    Object fn_abs(Args argv);                   // (abs x) | (abs xs)
-    Object fn_max(Args argv);                   // (max x1 x2 ...) | (max xs)
-    Object fn_min(Args argv);                   // (min x1 x2 ...) | (min xs)
-    Object fn_floor(Args argv);                 // (floor x) | (floor xs)
-    Object fn_ceil(Args argv);                  // (ceil x) | (ceil xs)
-    Object fn_round(Args argv);                 // (round x) | (round xs)
-    Object fn_trunc(Args argv);                 // (truncate x) | (truncate xs)
-    Object fn_sin(Args argv);                   // (sin x) | (sin xs)
-    Object fn_cos(Args argv);                   // (cos x) | (cos xs)
-    Object fn_tan(Args argv);                   // (tan x) | (tan xs)
-    Object fn_asin(Args argv);                  // (asin x) | (asin xs)
-    Object fn_acos(Args argv);                  // (acos x) | (acos xs)
-    Object fn_atan(Args argv);                  // (atan x) | (atan xs)
-    Object fn_atan2(Args argv);                 // (atan2 x y) | (atan2 xs ys)
-    Object fn_sinh(Args argv);                  // (sinh x) | (sinh xs)
-    Object fn_cosh(Args argv);                  // (cosh x) | (cosh xs)
-    Object fn_tanh(Args argv);                  // (tanh x) | (tanh xs)
-    Object fn_asinh(Args argv);                 // (asinh x) | (asinh xs)
-    Object fn_acosh(Args argv);                 // (acosh x) | (acosh xs)
-    Object fn_atanh(Args argv);                 // (atanh x) | (atanh xs)
-    Object fn_erf(Args argv);                   // (erf x) | (erf xs)
-    Object fn_erfc(Args argv);                  // (erfc x) | (erfc xs)
-    Object fn_gamma(Args argv);                 // (gamma x) | (gamma xs)
-    Object fn_lgamma(Args argv);                // (lgamm x) | (lgamma xs)
-    Object fn_pow(Args argv);                   // (pow x) | (pow xs)
-    Object fn_sqrt(Args argv);                  // (sqrt x) | (sqrt xs)
-    Object fn_cbrt(Args argv);                  // (cbrt x) | (cbrt xs)
-    Object fn_exp(Args argv);                   // (exp x) | (exp xs)
-    Object fn_exp2(Args argv);                  // (exp2 x) | (exp2 xs)
-    Object fn_expm1(Args argv);                 // (expm1 x) | (expm1 xs)
-    Object fn_log(Args argv);                   // (log x) | (log xs)
-    Object fn_log2(Args argv);                  // (log2 x) | (log2 xs)
-    Object fn_log1p(Args argv);                 // (log1p x) | (log1p xs)
-    Object fn_fma(Args argv);                   // (fma x) | (fma xs)
-
+    // -*- function in math module -*-
+    Object fn_math_abs(Args argv);              // (abs x) | (abs xs)
+    Object fn_math_max(Args argv);              // (max x1 x2 ...) | (max xs)
+    Object fn_math_min(Args argv);              // (min x1 x2 ...) | (min xs)
+    Object fn_math_floor(Args argv);            // (floor x) | (floor xs)
+    Object fn_math_ceil(Args argv);             // (ceil x) | (ceil xs)
+    Object fn_math_round(Args argv);            // (round x) | (round xs)
+    Object fn_math_trunc(Args argv);            // (truncate x) | (truncate xs)
+    Object fn_math_sin(Args argv);              // (sin x) | (sin xs)
+    Object fn_math_cos(Args argv);              // (cos x) | (cos xs)
+    Object fn_math_tan(Args argv);              // (tan x) | (tan xs)
+    Object fn_math_asin(Args argv);             // (asin x) | (asin xs)
+    Object fn_math_acos(Args argv);             // (acos x) | (acos xs)
+    Object fn_math_atan(Args argv);             // (atan x) | (atan xs)
+    Object fn_math_atan2(Args argv);            // (atan2 x y) | (atan2 xs ys)
+    Object fn_math_sinh(Args argv);             // (sinh x) | (sinh xs)
+    Object fn_math_cosh(Args argv);             // (cosh x) | (cosh xs)
+    Object fn_math_tanh(Args argv);             // (tanh x) | (tanh xs)
+    Object fn_math_asinh(Args argv);            // (asinh x) | (asinh xs)
+    Object fn_math_acosh(Args argv);            // (acosh x) | (acosh xs)
+    Object fn_math_atanh(Args argv);            // (atanh x) | (atanh xs)
+    Object fn_math_erf(Args argv);              // (erf x) | (erf xs)
+    Object fn_math_erfc(Args argv);             // (erfc x) | (erfc xs)
+    Object fn_math_gamma(Args argv);            // (gamma x) | (gamma xs)
+    Object fn_math_lgamma(Args argv);           // (lgamm x) | (lgamma xs)
+    Object fn_math_pow(Args argv);              // (pow x) | (pow xs)
+    Object fn_math_sqrt(Args argv);             // (sqrt x) | (sqrt xs)
+    Object fn_math_cbrt(Args argv);             // (cbrt x) | (cbrt xs)
+    Object fn_math_exp(Args argv);              // (exp x) | (exp xs)
+    Object fn_math_exp2(Args argv);             // (exp2 x) | (exp2 xs)
+    Object fn_math_expm1(Args argv);            // (expm1 x) | (expm1 xs)
+    Object fn_math_log(Args argv);              // (log x) | (log xs)
+    Object fn_math_log2(Args argv);             // (log2 x) | (log2 xs)
+    Object fn_math_log1p(Args argv);            // (log1p x) | (log1p xs)
+    Object fn_math_fma(Args argv);              // (fma x) | (fma xs)
 // -*-
 }
 
@@ -833,14 +858,25 @@ struct Module{
     fs::path path;
 
     explicit Module(const Str& name, const fs::path& path);
-    Env eval();
+    const Env& symbols(void) const;
     friend bool operator==(const Module& lhs, const Module& rhs);
+private:
+    Env m_symbols;
 };
 
 // -*---------*-
 // -*- Alize -*-
 // -*---------*-
 class Alize{
+private:
+    struct ModuleCmp{
+        bool operator()(const Module& lhs, const Module& rhs) const{
+            auto _lhs = lhs.name + "::" + lhs.path.string();
+            auto _rhs = rhs.name + "::" + rhs.path.string();
+            return (_lhs < _rhs);
+        }
+    };
+
 public:
     Alize();
     ~Alize() = default;
@@ -850,6 +886,7 @@ public:
 
     static Env runtime;
     static std::map<Str, Module> modules;
+    static std::set<Module, ModuleCmp> imported;
     static void initialize(void);
 
     // -*-
@@ -872,6 +909,7 @@ private:
     static std::map<Str, Module> m_modules;
     
     static void initialize_prelude(void);
+    static bool is_module_imported(const Module& mod);
 };
 
 
