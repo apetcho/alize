@@ -1,0 +1,7 @@
+(* HelloWorld.alz 
+    Simple hello world example written in Alize Programming language
+*)
+
+fun main{
+    println("Hello World")
+}

@@ -1,0 +1,42 @@
+// Quadratic.alz
+/*
+A simple program solving a quadratic equation in Alize Programming language
+*/
+
+fun quadratic(a, b, c){
+    @doc(Given ...
+    :param[a]
+    :param[b]
+    :param[c]
+    :return Result
+    )
+
+    let delta = b*b - 4*a*c
+    match sign(delta){
+        case(-1){
+            return Err("....")
+        }
+        case(0){
+            let x = -b/(2*a)
+            return Ok((x,))
+        }
+        case(1){
+            let sqd = delta.sqrt()
+            let x1 = (-b - sqd)/(2*a)
+            let x1 = (-b + sqd)/(2*a)
+            return Ok((x1, x2))
+        }
+    }
+}
+
+@main{
+    let result = quadratic(-1, 2, 1)
+    match result{
+        case(Ok((x1, x2))){
+            println("x1 = {x1}, x2 = {x2}")
+        }
+        case(Err(e)){
+            eprinln("Error: {e}")
+        }
+    }
+}
